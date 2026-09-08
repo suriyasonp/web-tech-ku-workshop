@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KU Web Technology Workshop — Vue 3 Frontend Self-Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="frontend.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <span class="eyebrow">KU Web Technology Development Workshop</span>
+      <h1>Build the Todo Frontend with Vue 3</h1>
+      <p class="lead">Continue the Todo API lab by creating a TypeScript frontend, styling it with Tailwind CSS, and integrating authenticated CRUD operations with Axios.</p>
+      <div class="hero-grid">
+        <div><strong>Level</strong><span>Beginner</span></div>
+        <div><strong>Framework</strong><span>Vue 3 + TypeScript</span></div>
+        <div><strong>UI</strong><span>Tailwind CSS</span></div>
+        <div><strong>Integration</strong><span>Axios + JWT</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <nav class="toc" aria-label="Lab navigation">
+      <strong>Frontend Lab</strong>
+      <a class="lab-switch" href="index.html">← Backend Lab</a>
+      <a href="#outcomes">Learning outcomes</a>
+      <a href="#flow">Request flow</a>
+      <a href="#setup">0. Setup</a>
+      <a href="#backend">1. Prepare backend</a>
+      <a href="#project">2. Create Vue project</a>
+      <a href="#tailwind">3. Add Tailwind CSS</a>
+      <a href="#axios">4. Add Axios</a>
+      <a href="#types">5. TypeScript models</a>
+      <a href="#client">6. API client</a>
+      <a href="#ui">7. Build the UI</a>
+      <a href="#run">8. Run full stack</a>
+      <a href="#verify">9. Verify CRUD</a>
+      <a href="#security">Security notes</a>
+      <a href="#troubleshooting">Troubleshooting</a>
+      <a href="#final">Final checkpoint</a>
+    </nav>
+
+    <article>
+      <section id="outcomes" class="card">
+        <h2>Learning outcomes</h2>
+        <p>By the end of this lab you should be able to:</p>
+        <ul>
+          <li>Create a Vue 3 project with TypeScript and Vite.</li>
+          <li>Build a responsive interface with Tailwind CSS utility classes.</li>
+          <li>Represent API request and response shapes with TypeScript interfaces.</li>
+          <li>Call an ASP.NET Core API with Axios.</li>
+          <li>Attach a JWT Bearer token to protected API requests.</li>
+          <li>Explain why CORS is required when frontend and backend use different origins.</li>
+          <li>Perform create, read, update, and delete operations from the browser.</li>
+        </ul>
+        <div class="note"><strong>Prerequisite:</strong> finish the <a href="index.html">.NET 10 Minimal API lab</a> first. The frontend expects its login and Todo endpoints.</div>
+      </section>
+
+      <section id="flow" class="card">
+        <h2>Understand the integration flow</h2>
+        <pre><code>Vue component
+    │ calls a typed function
+    ▼
+Axios API client
+    │ adds Authorization: Bearer &lt;token&gt;
+    │ sends HTTP + JSON
+    ▼
+.NET 10 Minimal API  ──► EF Core ──► SQLite
+    │
+    └── returns status code + JSON
+              │
+              ▼
+       Vue updates reactive state</code></pre>
+        <p>During development, Vite serves Vue at <code>http://localhost:5173</code> and ASP.NET Core serves the API at <code>http://localhost:5000</code>. These are different <strong>origins</strong> because their ports differ, so the backend must explicitly allow the Vue origin with CORS.</p>
+      </section>
+
+      <section id="setup" class="card">
+        <span class="step">STEP 0</span><h2>Prepare the frontend tools</h2>
+        <h3>Install required tools</h3>
+        <ul>
+          <li><a href="https://nodejs.org/en/download" target="_blank" rel="noreferrer">Node.js — official download</a> (use a current LTS release supported by Vue)</li>
+          <li><a href="https://code.visualstudio.com/Download" target="_blank" rel="noreferrer">Visual Studio Code — Microsoft</a></li>
+          <li><a href="https://marketplace.visualstudio.com/items?itemName=Vue.volar" target="_blank" rel="noreferrer">Vue - Official extension</a></li>
+          <li>Optional: <a href="https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss" target="_blank" rel="noreferrer">Tailwind CSS IntelliSense</a></li>
+        </ul>
+        <h3>Verify Node.js and npm</h3>
+        <pre><code>node --version
+npm --version</code></pre>
+        <div class="note"><strong>Windows:</strong> use PowerShell or Windows Terminal. <strong>macOS:</strong> use Terminal or VS Code's integrated terminal. The npm commands are the same on both platforms.</div>
+        <div class="checkpoint">Checkpoint: both commands print version numbers without errors.</div>
+      </section>
+
+      <section id="backend" class="card">
+        <span class="step">STEP 1</span><h2>Prepare the backend for Vue</h2>
+        <h3>Use a predictable development URL</h3>
+        <p>Open a terminal in <code>TodoApi</code> and run:</p>
+        <pre><code>dotnet run --urls http://localhost:5000</code></pre>
+        <p>Keep this terminal running. The frontend will use <code>http://localhost:5000</code> as its API base URL.</p>
+        <h3>Allow the Vue development origin with CORS</h3>
+        <p>In <code>Program.cs</code>, add this service registration <strong>before</strong> <code>builder.Build()</code>:</p>
+        <pre><code>builder.Services.AddCors(options =&gt;
+{
+    options.AddPolicy("VueClient", policy =&gt;
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});</code></pre>
+        <p>Add the middleware after <code>var app = builder.Build();</code> and before authentication/authorization:</p>
+        <pre><code>app.UseCors("VueClient");
+app.UseAuthentication();
+app.UseAuthorization();</code></pre>
+        <p>CORS means <strong>Cross-Origin Resource Sharing</strong>. Browsers block JavaScript from reading a response from another origin unless that server permits it. This policy permits only the local Vue development origin.</p>
+        <div class="warning"><strong>Production:</strong> configure only trusted frontend origins. Do not solve a CORS problem by allowing every origin without understanding the security impact.</div>
+        <div class="checkpoint">Checkpoint: the API runs at <code>http://localhost:5000</code> and allows <code>http://localhost:5173</code>.</div>
+      </section>
+
+      <section id="project" class="card">
+        <span class="step">STEP 2</span><h2>Create the Vue + TypeScript project</h2>
+        <p>Open a second terminal in the parent <code>todo-workshop</code> folder, beside <code>TodoApi</code>:</p>
+        <pre><code>npm create vue@latest</code></pre>
+        <table>
+          <thead><tr><th>Prompt</th><th>Choice</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td>Project name</td><td><code>todo-web</code></td><td>Creates the frontend folder.</td></tr>
+            <tr><td>Add TypeScript?</td><td>Yes</td><td>Adds static type checking.</td></tr>
+            <tr><td>Add JSX?</td><td>No</td><td>Vue templates are enough.</td></tr>
+            <tr><td>Add Vue Router?</td><td>No</td><td>The lab uses one screen.</td></tr>
+            <tr><td>Add Pinia?</td><td>No</td><td>Local reactive state is enough.</td></tr>
+            <tr><td>Add Vitest / E2E?</td><td>No</td><td>Testing can follow in another lab.</td></tr>
+            <tr><td>Add ESLint?</td><td>No</td><td>Keeps the beginner setup focused; add linting after the lab.</td></tr>
+            <tr><td>Add Prettier?</td><td>No</td><td>Keeps the first setup minimal.</td></tr>
+          </tbody>
+        </table>
+        <pre><code>cd todo-web
+npm install
+code .
+npm run dev</code></pre>
+        <p>Open <code>http://localhost:5173</code>. Stop the server with <kbd>Ctrl</kbd> + <kbd>C</kbd> before installing packages.</p>
+        <div class="checkpoint">Checkpoint: the default Vue welcome page appears.</div>
+      </section>
+
+      <section id="tailwind" class="card">
+        <span class="step">STEP 3</span><h2>Add Tailwind CSS</h2>
+        <pre><code>npm install tailwindcss @tailwindcss/vite</code></pre>
+        <p>Replace <code>vite.config.ts</code> with:</p>
+        <pre><code>import { fileURLToPath, URL } from 'node:url'
+
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [vue(), tailwindcss()],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
+})</code></pre>
+        <p>Replace <code>src/assets/main.css</code> with:</p>
+        <pre><code>@import "tailwindcss";
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f4f4f5;
+}</code></pre>
+        <p>Confirm <code>src/main.ts</code> still contains <code>import './assets/main.css'</code>.</p>
+        <div class="note">This uses Tailwind's Vite plugin, so the basic setup does not need <code>tailwind.config.js</code>.</div>
+      </section>
+
+      <section id="axios" class="card">
+        <span class="step">STEP 4</span><h2>Install Axios and configure the API URL</h2>
+        <pre><code>npm install axios</code></pre>
+        <p>Create <code>.env.development</code> in the project root:</p>
+        <pre><code>VITE_API_BASE_URL=http://localhost:5000</code></pre>
+        <p>Vite exposes client variables whose names start with <code>VITE_</code>. TypeScript reads this value as <code>import.meta.env.VITE_API_BASE_URL</code>.</p>
+        <div class="warning"><strong>Frontend variables are public:</strong> never store a JWT signing key, password, or database connection string in a <code>VITE_</code> variable.</div>
+      </section>
+
+      <section id="types" class="card">
+        <span class="step">STEP 5</span><h2>Create TypeScript models</h2>
+        <p>Create <code>src/types/todo.ts</code>:</p>
+        <pre><code>export interface Todo {
+  id: number
+  title: string
+  isCompleted: boolean
+}
+
+export interface CreateTodoRequest {
+  title: string
+}
+
+export interface UpdateTodoRequest {
+  title: string
+  isCompleted: boolean
+}
+
+export interface LoginRequest {
+  username: string
+  password: string
+}
+
+export interface LoginResponse {
+  accessToken: string
+}</code></pre>
+        <p>These interfaces match the backend DTO contracts. ASP.NET Core serializes property names as camel case by default, so C# <code>IsCompleted</code> becomes JSON <code>isCompleted</code>.</p>
+      </section>
+
+      <section id="client" class="card">
+        <span class="step">STEP 6</span><h2>Create the Axios API client</h2>
+        <p>Create <code>src/services/api.ts</code>:</p>
+        <pre><code>import axios from 'axios'
+import type {
+  CreateTodoRequest,
+  LoginRequest,
+  LoginResponse,
+  Todo,
+  UpdateTodoRequest,
+} from '@/types/todo'
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+})
+
+api.interceptors.request.use((config) =&gt; {
+  const token = localStorage.getItem('accessToken')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+export async function login(request: LoginRequest): Promise&lt;void&gt; {
+  const response = await api.post&lt;LoginResponse&gt;('/api/auth/login', request)
+  localStorage.setItem('accessToken', response.data.accessToken)
+}
+
+export function logout(): void {
+  localStorage.removeItem('accessToken')
+}
+
+export function hasToken(): boolean {
+  return localStorage.getItem('accessToken') !== null
+}
+
+export async function getTodos(): Promise&lt;Todo[]&gt; {
+  const response = await api.get&lt;Todo[]&gt;('/api/todos')
+  return response.data
+}
+
+export async function createTodo(request: CreateTodoRequest): Promise&lt;Todo&gt; {
+  const response = await api.post&lt;Todo&gt;('/api/todos', request)
+  return response.data
+}
+
+export async function updateTodo(
+  id: number,
+  request: UpdateTodoRequest,
+): Promise&lt;Todo&gt; {
+  const response = await api.put&lt;Todo&gt;(`/api/todos/${id}`, request)
+  return response.data
+}
+
+export async function deleteTodo(id: number): Promise&lt;void&gt; {
+  await api.delete(`/api/todos/${id}`)
+}</code></pre>
+        <h3>How authentication is integrated</h3>
+        <ol>
+          <li>Login returns <code>accessToken</code>.</li>
+          <li>The client stores it in <code>localStorage</code> for this workshop.</li>
+          <li>The interceptor runs before every Axios request.</li>
+          <li>It adds <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+          <li>The API validates the token before running protected Todo endpoints.</li>
+        </ol>
+      </section>
+
+      <section id="ui" class="card">
+        <span class="step">STEP 7</span><h2>Build the login and Todo UI</h2>
+        <p>Replace <code>src/App.vue</code> with:</p>
+        <pre><code>&lt;script setup lang="ts"&gt;
+import { computed, onMounted, ref } from 'vue'
+import {
+  createTodo, deleteTodo, getTodos, hasToken,
+  login, logout, updateTodo,
+} from '@/services/api'
+import type { Todo } from '@/types/todo'
+
+const todos = ref&lt;Todo[]&gt;([])
+const username = ref('student')
+const password = ref('password')
+const newTitle = ref('')
+const isAuthenticated = ref(hasToken())
+const isLoading = ref(false)
+const errorMessage = ref('')
+
+const remainingCount = computed(
+  () =&gt; todos.value.filter((todo) =&gt; !todo.isCompleted).length,
+)
+
+function showError(error: unknown): void {
+  console.error(error)
+  errorMessage.value = 'Request failed. Check that the API is running and try again.'
+}
+
+async function loadTodos(): Promise&lt;void&gt; {
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    todos.value = await getTodos()
+  } catch (error) {
+    showError(error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function handleLogin(): Promise&lt;void&gt; {
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    await login({ username: username.value, password: password.value })
+    isAuthenticated.value = true
+    await loadTodos()
+  } catch (error) {
+    showError(error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function handleCreate(): Promise&lt;void&gt; {
+  const title = newTitle.value.trim()
+  if (!title) return
+  try {
+    todos.value.push(await createTodo({ title }))
+    newTitle.value = ''
+  } catch (error) {
+    showError(error)
+  }
+}
+
+async function handleToggle(todo: Todo): Promise&lt;void&gt; {
+  try {
+    const updated = await updateTodo(todo.id, {
+      title: todo.title,
+      isCompleted: !todo.isCompleted,
+    })
+    Object.assign(todo, updated)
+  } catch (error) {
+    showError(error)
+  }
+}
+
+async function handleRename(todo: Todo): Promise&lt;void&gt; {
+  const title = window.prompt('Rename Todo', todo.title)?.trim()
+  if (!title || title === todo.title) return
+  try {
+    const updated = await updateTodo(todo.id, {
+      title,
+      isCompleted: todo.isCompleted,
+    })
+    Object.assign(todo, updated)
+  } catch (error) {
+    showError(error)
+  }
+}
+
+async function handleDelete(todo: Todo): Promise&lt;void&gt; {
+  if (!window.confirm(`Delete "${todo.title}"?`)) return
+  try {
+    await deleteTodo(todo.id)
+    todos.value = todos.value.filter((item) =&gt; item.id !== todo.id)
+  } catch (error) {
+    showError(error)
+  }
+}
+
+function handleLogout(): void {
+  logout()
+  todos.value = []
+  isAuthenticated.value = false
+}
+
+onMounted(() =&gt; {
+  if (isAuthenticated.value) void loadTodos()
+})
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;main class="min-h-screen px-4 py-10 text-zinc-950"&gt;
+    &lt;section class="mx-auto max-w-2xl"&gt;
+      &lt;header class="mb-8 border-b-4 border-amber-400 pb-5"&gt;
+        &lt;p class="mb-2 text-sm font-bold uppercase tracking-widest"&gt;
+          KU Web Technology Workshop
+        &lt;/p&gt;
+        &lt;div class="flex items-end justify-between gap-4"&gt;
+          &lt;div&gt;
+            &lt;h1 class="text-4xl font-black tracking-tight sm:text-5xl"&gt;Todo App&lt;/h1&gt;
+            &lt;p class="mt-2 text-zinc-600"&gt;Vue 3 · TypeScript · Tailwind CSS · .NET 10&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;button v-if="isAuthenticated" class="border border-zinc-300 bg-white px-4 py-2 font-semibold hover:bg-zinc-100" type="button" @click="handleLogout"&gt;
+            Log out
+          &lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/header&gt;
+
+      &lt;p v-if="errorMessage" class="mb-5 border-l-4 border-red-600 bg-red-50 p-4 text-red-800" role="alert"&gt;
+        {{ errorMessage }}
+      &lt;/p&gt;
+
+      &lt;form v-if="!isAuthenticated" class="border border-zinc-200 bg-white p-6 shadow-sm" @submit.prevent="handleLogin"&gt;
+        &lt;h2 class="mb-5 text-2xl font-bold"&gt;Sign in&lt;/h2&gt;
+        &lt;label class="mb-4 block"&gt;
+          &lt;span class="mb-1 block font-semibold"&gt;Username&lt;/span&gt;
+          &lt;input v-model="username" class="w-full border border-zinc-300 px-3 py-2 outline-none focus:border-zinc-950" autocomplete="username" required /&gt;
+        &lt;/label&gt;
+        &lt;label class="mb-5 block"&gt;
+          &lt;span class="mb-1 block font-semibold"&gt;Password&lt;/span&gt;
+          &lt;input v-model="password" class="w-full border border-zinc-300 px-3 py-2 outline-none focus:border-zinc-950" type="password" autocomplete="current-password" required /&gt;
+        &lt;/label&gt;
+        &lt;button class="w-full bg-zinc-950 px-4 py-3 font-bold text-white hover:bg-zinc-800 disabled:opacity-50" type="submit" :disabled="isLoading"&gt;
+          {{ isLoading ? 'Signing in…' : 'Sign in' }}
+        &lt;/button&gt;
+        &lt;p class="mt-4 text-sm text-zinc-500"&gt;Workshop account: student / password&lt;/p&gt;
+      &lt;/form&gt;
+
+      &lt;section v-else&gt;
+        &lt;form class="mb-6 flex gap-2" @submit.prevent="handleCreate"&gt;
+          &lt;input v-model="newTitle" class="min-w-0 flex-1 border border-zinc-300 bg-white px-4 py-3 outline-none focus:border-zinc-950" placeholder="What needs to be done?" aria-label="New Todo title" /&gt;
+          &lt;button class="bg-amber-400 px-5 py-3 font-bold hover:bg-amber-300" type="submit"&gt;Add&lt;/button&gt;
+        &lt;/form&gt;
+
+        &lt;div class="mb-3 flex items-center justify-between text-sm text-zinc-600"&gt;
+          &lt;span&gt;{{ remainingCount }} remaining&lt;/span&gt;
+          &lt;button type="button" class="font-semibold underline" @click="loadTodos"&gt;Refresh&lt;/button&gt;
+        &lt;/div&gt;
+
+        &lt;p v-if="isLoading" class="border border-zinc-200 bg-white p-5"&gt;Loading…&lt;/p&gt;
+        &lt;p v-else-if="todos.length === 0" class="border border-dashed border-zinc-300 p-8 text-center text-zinc-500"&gt;
+          No Todos yet. Add your first one above.
+        &lt;/p&gt;
+        &lt;ul v-else class="space-y-3"&gt;
+          &lt;li v-for="todo in todos" :key="todo.id" class="flex items-center gap-3 border border-zinc-200 bg-white p-4 shadow-sm"&gt;
+            &lt;input class="size-5 accent-amber-400" type="checkbox" :checked="todo.isCompleted" :aria-label="`Mark ${todo.title} completed`" @change="handleToggle(todo)" /&gt;
+            &lt;span class="min-w-0 flex-1 break-words" :class="todo.isCompleted ? 'text-zinc-400 line-through' : ''"&gt;{{ todo.title }}&lt;/span&gt;
+            &lt;button class="font-semibold text-zinc-600 hover:text-zinc-950" type="button" @click="handleRename(todo)"&gt;Edit&lt;/button&gt;
+            &lt;button class="font-semibold text-red-700 hover:text-red-900" type="button" @click="handleDelete(todo)"&gt;Delete&lt;/button&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/section&gt;
+    &lt;/section&gt;
+  &lt;/main&gt;
+&lt;/template&gt;</code></pre>
+        <h3>Vue concepts used</h3>
+        <table>
+          <thead><tr><th>Concept</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>ref</code></td><td>Reactive Todos, form values, loading, and errors.</td></tr>
+            <tr><td><code>computed</code></td><td>Derives the remaining count.</td></tr>
+            <tr><td><code>onMounted</code></td><td>Loads Todos after a signed-in user refreshes.</td></tr>
+            <tr><td><code>v-model</code></td><td>Synchronizes inputs with reactive values.</td></tr>
+            <tr><td><code>v-if</code></td><td>Switches between login and Todo screens.</td></tr>
+            <tr><td><code>v-for</code></td><td>Renders each Todo.</td></tr>
+            <tr><td><code>@submit</code> / <code>@click</code></td><td>Handles user actions.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="run" class="card">
+        <span class="step">STEP 8</span><h2>Run the full stack</h2>
+        <p>You need two terminal sessions:</p>
+        <div class="two-col">
+          <div><h3>Terminal 1 — Backend</h3><pre><code>cd TodoApi
+dotnet run --urls http://localhost:5000</code></pre></div>
+          <div><h3>Terminal 2 — Frontend</h3><pre><code>cd todo-web
+npm run dev</code></pre></div>
+        </div>
+        <p>Open <code>http://localhost:5173</code> and sign in with:</p>
+        <pre><code>Username: student
+Password: password</code></pre>
+        <div class="checkpoint">Checkpoint: login succeeds and the Todo list loads without a CORS or 401 error.</div>
+      </section>
+
+      <section id="verify" class="card">
+        <span class="step">STEP 9</span><h2>Verify the complete CRUD workflow</h2>
+        <table>
+          <thead><tr><th>Action</th><th>Request</th><th>Expected result</th></tr></thead>
+          <tbody>
+            <tr><td>Sign in</td><td><code>POST /api/auth/login</code></td><td>Todo screen appears.</td></tr>
+            <tr><td>Load</td><td><code>GET /api/todos</code></td><td>Existing Todos appear.</td></tr>
+            <tr><td>Add</td><td><code>POST /api/todos</code></td><td>New Todo appears.</td></tr>
+            <tr><td>Complete</td><td><code>PUT /api/todos/{id}</code></td><td>Todo becomes checked.</td></tr>
+            <tr><td>Rename</td><td><code>PUT /api/todos/{id}</code></td><td>New title appears.</td></tr>
+            <tr><td>Delete</td><td><code>DELETE /api/todos/{id}</code></td><td>Todo disappears.</td></tr>
+            <tr><td>Log out</td><td>No API call</td><td>Token is removed.</td></tr>
+          </tbody>
+        </table>
+        <h3>Inspect requests in the browser</h3>
+        <ol>
+          <li>Open Developer Tools and select <strong>Network</strong>.</li>
+          <li>Create or update a Todo.</li>
+          <li>Inspect its method, URL, status, request payload, and response.</li>
+          <li>Under Request Headers, find <code>Authorization: Bearer ...</code>.</li>
+        </ol>
+      </section>
+
+      <section id="security" class="card">
+        <h2>Security notes for after the workshop</h2>
+        <p>The lab uses <code>localStorage</code> so the Bearer-token flow is easy to inspect. JavaScript can read local storage, so an XSS vulnerability could expose that token. Production authentication needs a deliberate design—often short-lived access tokens and secure, <code>HttpOnly</code>, <code>Secure</code>, appropriately configured cookies for refresh or session material.</p>
+        <ul>
+          <li>Never put the JWT signing key in the Vue project.</li>
+          <li>Use HTTPS outside local development.</li>
+          <li>Validate and authorize every protected operation on the server.</li>
+          <li>Do not treat a hidden button as authorization.</li>
+          <li>Use a real identity store and hashed passwords.</li>
+        </ul>
+      </section>
+
+      <section id="troubleshooting" class="card">
+        <h2>Troubleshooting</h2>
+        <details><summary><code>npm</code> command not found</summary><p>Install Node.js, reopen the terminal, then run the version commands again.</p></details>
+        <details><summary>Browser reports a CORS error</summary><p>Confirm Vue is at <code>http://localhost:5173</code>, the API has the CORS policy, and the backend was restarted.</p></details>
+        <details><summary>Axios reports Network Error</summary><p>Confirm the API is at <code>http://localhost:5000</code>. Restart <code>npm run dev</code> after changing an environment file.</p></details>
+        <details><summary>Todo request returns 401</summary><p>Sign in again. Inspect local storage for <code>accessToken</code> and the Network request for its Authorization header.</p></details>
+        <details><summary><code>@/</code> import cannot be resolved</summary><p>Keep the alias in <code>vite.config.ts</code>. The official Vue TypeScript template configures the matching TypeScript path.</p></details>
+        <details><summary>Tailwind classes have no effect</summary><p>Confirm the Vite plugin, CSS import, and <code>src/main.ts</code> stylesheet import, then restart Vite.</p></details>
+        <details><summary>Vite uses another port</summary><p>Stop other Vite processes or add the actual origin to the API CORS policy. The origins must match exactly.</p></details>
+      </section>
+
+      <section id="final" class="card final-card">
+        <h2>Final checkpoint</h2>
+        <ul class="checklist">
+          <li>The Vue project passes TypeScript checking and builds.</li>
+          <li>Tailwind CSS styles the page responsively.</li>
+          <li>The backend allows the intended Vue development origin.</li>
+          <li>Login returns a token and the client stores it.</li>
+          <li>Axios sends the Bearer token with protected requests.</li>
+          <li>The browser can create, read, update, and delete Todos.</li>
+          <li>Todos remain after application restarts because SQLite persists them.</li>
+        </ul>
+        <h3>Build the production frontend</h3>
+        <pre><code>npm run build</code></pre>
+        <p>Vite type-checks and creates the optimized frontend in <code>dist/</code>. When deploying, replace the development CORS origin and API URL with real production values.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer><div class="wrap">KU Web Technology Development Workshop · Vue 3 Frontend Self-Paced Lab</div></footer>
+</body>
+</html>

@@ -2,9 +2,11 @@
 
 Self-paced hands-on materials for the KU Web Technology Development workshop.
 
-## .NET 10 Minimal API Self-Lab
+## Full-Stack Todo Self-Labs
 
-Students build a Todo API step by step with:
+Students build a complete Todo application step by step.
+
+### Backend — .NET 10 Minimal API
 
 - Visual Studio Code
 - .NET 10 Minimal API
@@ -16,7 +18,22 @@ Students build a Todo API step by step with:
 - JWT Bearer authentication
 - VS Code REST Client testing
 
-The student-facing lab is in [`docs/index.html`](docs/index.html) and is deployed with GitHub Pages after changes are merged into `main`.
+### Frontend — Vue 3 + TypeScript
+
+- Vue 3 Composition API and Single-File Components
+- TypeScript models
+- Tailwind CSS
+- Axios API client
+- Login and JWT Bearer token handling
+- Authenticated Todo CRUD integration
+- CORS configuration in ASP.NET Core
+
+The student-facing labs are:
+
+- [`docs/index.html`](docs/index.html) — Backend lab
+- [`docs/frontend.html`](docs/frontend.html) — Frontend and backend-integration lab
+
+Complete the backend lab first, then continue with the frontend lab.
 
 ### GitHub Pages
 
