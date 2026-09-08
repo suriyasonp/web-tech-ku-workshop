@@ -10,3 +10,17 @@
   color: var(--text);
   filter: brightness(.96);
 }
+
+.result-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .08);
+}
+
+figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .9rem;
+}

@@ -38,6 +38,7 @@
       <a href="#ui">7. Build the UI</a>
       <a href="#run">8. Run full stack</a>
       <a href="#verify">9. Verify CRUD</a>
+      <a href="#complete-project">10. Run completed project</a>
       <a href="#security">Security notes</a>
       <a href="#troubleshooting">Troubleshooting</a>
       <a href="#final">Final checkpoint</a>
@@ -508,6 +509,26 @@ Password: password</code></pre>
           <li>Inspect its method, URL, status, request payload, and response.</li>
           <li>Under Request Headers, find <code>Authorization: Bearer ...</code>.</li>
         </ol>
+      </section>
+
+      <section id="complete-project" class="card">
+        <span class="step">STEP 10</span><h2>Run and capture the completed project</h2>
+        <p>The repository includes a finished version of the code from both labs:</p>
+        <pre><code>backend/TodoApi/   .NET 10 API
+frontend/          Vue 3 application
+scripts/           Run and capture automation</code></pre>
+        <p>From the repository root, install dependencies and start both applications:</p>
+        <pre><code>npm install
+npm run setup
+npm run dev</code></pre>
+        <p>Open the frontend at <code>http://localhost:5173</code>. The API reference is available at <code>http://localhost:5000/scalar/v1</code>.</p>
+        <h3>Generate the screenshot</h3>
+        <pre><code>npm run capture</code></pre>
+        <p>Playwright starts Chromium, signs in, creates a Todo, and saves the following image automatically:</p>
+        <figure>
+          <img class="result-image" src="images/todo-app-demo.png" alt="Completed Vue Todo application after authenticated API integration" />
+          <figcaption>Result captured from the completed Vue + TypeScript frontend.</figcaption>
+        </figure>
       </section>
 
       <section id="security" class="card">
