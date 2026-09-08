@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+backend/TodoApi/todo.db*
+.DS_Store
+.cache/

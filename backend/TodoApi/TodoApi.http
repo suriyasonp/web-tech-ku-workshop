@@ -1,0 +1,44 @@
+@host = http://localhost:5000
+@token = PASTE_ACCESS_TOKEN_HERE
+
+### API information
+GET {{host}}/
+
+### OpenAPI document
+GET {{host}}/openapi/v1.json
+
+### Login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "student",
+  "password": "password"
+}
+
+### Get all Todos
+GET {{host}}/api/todos
+Authorization: Bearer {{token}}
+
+### Create a Todo
+POST {{host}}/api/todos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Run the completed project"
+}
+
+### Update a Todo
+PUT {{host}}/api/todos/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Complete the backend lab",
+  "isCompleted": true
+}
+
+### Delete a Todo
+DELETE {{host}}/api/todos/1
+Authorization: Bearer {{token}}

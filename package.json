@@ -1,0 +1,17 @@
+{
+  "name": "web-tech-ku-workshop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "npm install --prefix frontend",
+    "setup:capture": "playwright install chromium",
+    "dev": "node scripts/run-dev.mjs",
+    "capture": "node scripts/capture-demo.mjs",
+    "capture:mock": "node scripts/capture-demo.mjs --mock-api",
+    "build:frontend": "npm run build --prefix frontend"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
