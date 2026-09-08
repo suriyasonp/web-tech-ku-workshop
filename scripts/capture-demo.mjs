@@ -3,8 +3,7 @@ import { mkdir } from 'node:fs/promises'
 import http from 'node:http'
 import path from 'node:path'
 import process from 'node:process'
-import chromiumBinary, { inflate } from '@sparticuz/chromium'
-import { chromium as playwrightChromium } from 'playwright'
+import { chromium } from 'playwright'
 
 const useMockApi = process.argv.includes('--mock-api')
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm'
@@ -72,33 +71,6 @@ function stopProcesses() {
   if (mockServer) mockServer.close()
 }
 
-async function launchBrowser() {
-  try {
-    return await playwrightChromium.launch({ headless: true })
-  } catch (error) {
-    console.warn(`Playwright Chromium is unavailable; using the bundled Linux fallback. ${error.message}`)
-    const chromiumTemp = path.resolve('.cache/chromium')
-    await mkdir(chromiumTemp, { recursive: true })
-    process.env.TMPDIR = chromiumTemp
-    chromiumBinary.setGraphicsMode = false
-    const executablePath = await inflate(
-      path.resolve('node_modules/@sparticuz/chromium/bin/chromium.br'),
-    )
-    return playwrightChromium.launch({
-      args: [
-        '--no-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--disable-software-rasterizer',
-        '--no-zygote',
-        '--single-process',
-      ],
-      executablePath,
-      headless: true,
-    })
-  }
-}
-
 try {
   if (useMockApi) {
     startMockApi()
@@ -126,7 +98,7 @@ try {
   ], { stdio: 'inherit' }))
 
   await waitFor('http://127.0.0.1:5173')
-  const browser = await launchBrowser()
+  const browser = await chromium.launch({ headless: true })
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 })
 
   await page.goto('http://127.0.0.1:5173', { waitUntil: 'networkidle' })

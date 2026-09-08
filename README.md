@@ -69,8 +69,11 @@ Sign in with `student` / `password`.
 With dependencies installed, run:
 
 ```bash
+npm run setup:capture
 npm run capture
 ```
+
+The first command installs Playwright's Chromium browser and only needs to be run once.
 
 This starts both applications, signs in with Playwright using Chromium, creates a demonstration Todo, and saves `docs/images/todo-app-demo.png`.
 

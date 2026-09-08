@@ -523,7 +523,9 @@ npm run setup
 npm run dev</code></pre>
         <p>Open the frontend at <code>http://localhost:5173</code>. The API reference is available at <code>http://localhost:5000/scalar/v1</code>.</p>
         <h3>Generate the screenshot</h3>
-        <pre><code>npm run capture</code></pre>
+        <pre><code>npm run setup:capture
+npm run capture</code></pre>
+        <p>Install Chromium once with <code>setup:capture</code>. Future captures only need <code>npm run capture</code>.</p>
         <p>Playwright starts Chromium, signs in, creates a Todo, and saves the following image automatically:</p>
         <figure>
           <img class="result-image" src="images/todo-app-demo.png" alt="Completed Vue Todo application after authenticated API integration" />

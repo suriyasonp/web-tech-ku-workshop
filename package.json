@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "setup": "npm install --prefix frontend && playwright install chromium",
+    "setup": "npm install --prefix frontend",
+    "setup:capture": "playwright install chromium",
     "dev": "node scripts/run-dev.mjs",
     "capture": "node scripts/capture-demo.mjs",
     "capture:mock": "node scripts/capture-demo.mjs --mock-api",
     "build:frontend": "npm run build --prefix frontend"
   },
   "devDependencies": {
-    "@sparticuz/chromium": "^152.0.0",
     "playwright": "1.63.0"
   }
 }
