@@ -1,0 +1,12 @@
+.toc .lab-switch {
+  background: var(--accent);
+  color: var(--text);
+  font-weight: 800;
+  margin: 10px 0 14px;
+  padding: 9px 10px;
+}
+
+.toc .lab-switch:hover {
+  color: var(--text);
+  filter: brightness(.96);
+}
