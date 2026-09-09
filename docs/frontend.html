@@ -27,6 +27,16 @@
       <strong>Frontend Lab</strong>
       <a class="lab-switch" href="index.html">← Backend Lab</a>
       <a href="#outcomes">Learning outcomes</a>
+      <a href="#foundations">Before coding: foundations</a>
+      <a href="#foundation-typescript">TypeScript basics</a>
+      <a href="#foundation-vue">Vue and reactivity</a>
+      <a href="#foundation-events">Props, events and emit</a>
+      <a href="#foundation-tailwind">Tailwind basics</a>
+      <a href="#foundation-query">Queries and async UI</a>
+      <a href="#foundation-composables">Composables</a>
+      <a href="#foundation-state">State and Pinia</a>
+      <a href="#foundation-routing">Routing</a>
+      <a href="#foundation-ready">Readiness check</a>
       <a href="#flow">Request flow</a>
       <a href="#setup">0. Setup</a>
       <a href="#backend">1. Prepare backend</a>
@@ -59,6 +69,259 @@
         </ul>
         <div class="note"><strong>Prerequisite:</strong> finish the <a href="index.html">.NET 10 Minimal API lab</a> first. The frontend expects its login and Todo endpoints.</div>
       </section>
+
+<section id="foundations" class="card"><span class="step">BEFORE YOU CODE</span><h2>Frontend foundations: start here</h2>
+<p>Read this tutorial before Step 0. Allow about 60–90 minutes, including discussion. No project installation is needed to read the examples. You can try the standalone Vue examples in the <a href="https://play.vuejs.org/">Vue Playground</a>, or revisit them after Step 2. Examples are independent learning exercises; do not paste all of them into the final App.vue.</p>
+<h3>What should you already know?</h3>
+<ul><li><strong>HTML:</strong> headings, lists, labels, inputs, buttons and forms.</li><li><strong>CSS:</strong> selectors, margin versus padding, the box model, flexbox and responsive widths.</li><li><strong>JavaScript:</strong> const/let, objects, arrays, functions, imports/exports, map/filter, promises and async/await.</li><li><strong>Web APIs:</strong> HTTP methods, status codes and JSON from the backend lab.</li></ul>
+<p>If these are new, review the <a href="https://developer.mozilla.org/en-US/docs/Learn_web_development">MDN web development learning materials</a> first. You do not need prior Vue experience.</p>
+<h3>What each tool does</h3>
+<table><thead><tr><th>Tool</th><th>Responsibility in our Todo app</th></tr></thead><tbody>
+<tr><td>Vue</td><td>Renders components and updates the UI when reactive data changes.</td></tr>
+<tr><td>TypeScript</td><td>Checks the shapes of values and function calls during development.</td></tr>
+<tr><td>Tailwind CSS</td><td>Provides small styling classes for layout, spacing, color and responsive states.</td></tr>
+<tr><td>Vite / npm</td><td>Vite serves and bundles the frontend; npm installs packages and runs project scripts.</td></tr>
+<tr><td>Axios</td><td>Sends HTTP requests to our .NET API.</td></tr></tbody></table>
+<h3>Learning priorities</h3>
+<table><thead><tr><th>Priority</th><th>Concepts</th><th>Use in this lab</th></tr></thead><tbody>
+<tr><td>Understand before coding</td><td>Types, components, ref/computed, directives, events, CSS utilities, async requests</td><td>Used directly in Steps 3–7.</td></tr>
+<tr><td>Understand the pattern</td><td>Props/emits and composables</td><td>Practice below; useful when splitting the final App.vue.</td></tr>
+<tr><td>Know when to add</td><td>Routing, Pinia and TanStack Query</td><td>Concept previews; optional follow-up work after CRUD succeeds.</td></tr></tbody></table>
+</section>
+<section id="foundation-typescript" class="card"><span class="step">BEFORE YOU CODE</span><h2>1. TypeScript basics</h2>
+<p>TypeScript adds a type checker to JavaScript. A type describes which values are allowed. The browser runs the JavaScript produced by the build tools; type annotations are removed. Types help catch mistakes before execution, but do not validate incoming JSON at runtime.</p>
+<p>Read this independent example in the <a href="https://www.typescriptlang.org/play">TypeScript Playground</a>:</p>
+<pre><code>interface Todo {
+  id: number
+  title: string
+  isCompleted: boolean
+  note?: string
+}
+type Filter = &#x27;all&#x27; | &#x27;active&#x27; | &#x27;completed&#x27;
+const title = &#x27;Learn Vue&#x27; // inferred as a string value
+let filter: Filter = &#x27;active&#x27;
+const todos: Todo[] = [
+  { id: 1, title, isCompleted: false },
+]
+function remaining(items: Todo[]): number {
+  return items.filter(item =&gt; !item.isCompleted).length
+}
+const selected: Todo | undefined = todos.find(item =&gt; item.id === 2)
+console.log(selected?.title ?? &#x27;No selection&#x27;)
+console.log(remaining(todos))</code></pre>
+<p><code>number</code>, <code>string</code> and <code>boolean</code> are primitive types; <code>Todo[]</code> is an array. An interface names an object shape. A union such as <code>Todo | undefined</code> permits either value. The optional <code>note?</code> may be absent; <code>?.</code> safely accesses a possibly missing value and <code>??</code> supplies a fallback.</p>
+<p>Functions can declare parameter and return types. An asynchronous function returning Todos has type <code>Promise&lt;Todo[]&gt;</code>. <code>await</code> waits for that result inside an async function. Use <code>import type { Todo }</code> for type-only imports. Prefer <code>unknown</code> over <code>any</code> for unexpected errors, then narrow with <code>error instanceof Error</code> before accessing its message.</p>
+<div class="checkpoint">Try: change isCompleted to 'false' and filter to 'pending'. The checker should reject both. Restore them. Explain why a TypeScript interface cannot stop a server from sending malformed JSON.</div>
+<p>Reference: <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html">TypeScript everyday types</a>.</p>
+</section>
+<section id="foundation-vue" class="card"><span class="step">BEFORE YOU CODE</span><h2>2. Vue components and reactive state</h2>
+<p>A component is a reusable part of a page, such as a Todo row or login form. A Single-File Component (<code>.vue</code>) places logic in <code>&lt;script setup lang="ts"&gt;</code>, markup in <code>&lt;template&gt;</code>, and optional CSS in <code>&lt;style scoped&gt;</code>. This workshop uses the Composition API.</p>
+<p>Vue tracks reactive values and updates the rendered page. Try this complete component as App.vue in the Vue Playground:</p>
+<pre><code>&lt;script setup lang=&quot;ts&quot;&gt;
+import { computed, ref } from &#x27;vue&#x27;
+const title = ref(&#x27;&#x27;)
+const savedTitles = ref&lt;string[]&gt;([])
+const count = computed(() =&gt; savedTitles.value.length)
+
+function add(): void {
+  const value = title.value.trim()
+  if (!value) return
+  savedTitles.value.push(value)
+  title.value = &#x27;&#x27;
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;form @submit.prevent=&quot;add&quot;&gt;
+    &lt;label for=&quot;title&quot;&gt;Todo title&lt;/label&gt;
+    &lt;input id=&quot;title&quot; v-model=&quot;title&quot; /&gt;
+    &lt;button :disabled=&quot;!title.trim()&quot;&gt;Add&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;p&gt;{{ count }} saved&lt;/p&gt;
+  &lt;p v-if=&quot;count === 0&quot;&gt;Add your first Todo.&lt;/p&gt;
+  &lt;ul v-else&gt;
+    &lt;li v-for=&quot;(item, index) in savedTitles&quot; :key=&quot;index&quot;&gt;{{ item }}&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/template&gt;</code></pre>
+<p><code>ref</code> holds a reactive value; use <code>.value</code> in script. Top-level refs are unwrapped in the template. <code>computed</code> derives a value from other state, so you do not manually keep the count in sync. A plain variable is not a reactive replacement for ref.</p>
+<table><thead><tr><th>Syntax</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>{{ title }}</td><td>Display a value as text.</td></tr>
+<tr><td>:disabled</td><td>Bind an HTML attribute/property to an expression; shorthand for v-bind.</td></tr>
+<tr><td>v-model</td><td>Keep an input and a state value synchronized.</td></tr>
+<tr><td>v-if / v-else</td><td>Render a branch conditionally.</td></tr>
+<tr><td>v-for and :key</td><td>Render a list and identify each item. Use todo.id in the API lab; an index is acceptable only for this append-only demonstration.</td></tr>
+<tr><td>onMounted</td><td>Register work after the component mounts, such as loading initial data.</td></tr>
+<tr><td>watch</td><td>Run a side effect when a value changes; use computed for derived values instead.</td></tr></tbody></table>
+<div class="checkpoint">Try: submit two titles, including one by pressing Enter. Expect a count of 2, two rows and a cleared input. Refresh: these local values disappear because this example has no persistence.</div>
+<p>Reference: <a href="https://vuejs.org/guide/introduction.html">Vue introduction</a>.</p>
+</section>
+<section id="foundation-events" class="card"><span class="step">BEFORE YOU CODE</span><h2>3. Events, props and emit</h2>
+<p>A DOM event comes from the browser: <code>@click="handleDelete"</code> handles a click and <code>@change</code> handles a changed input. <code>@</code> is shorthand for <code>v-on</code>. The <code>.prevent</code> modifier in <code>@submit.prevent</code> prevents a form's normal page navigation.</p>
+<p>Components communicate through an explicit contract: a parent supplies <strong>props</strong>; a child <strong>emits</strong> an event when something happens. The parent owns the data and decides how to change it. Component events do not automatically bubble through every ancestor.</p>
+<p>Practice in the Vue Playground: add a file called <code>TodoRow.vue</code>:</p>
+<pre><code>&lt;script setup lang=&quot;ts&quot;&gt;
+defineProps&lt;{ title: string; completed: boolean }&gt;()
+const emit = defineEmits&lt;{ toggle: [] }&gt;()
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;button type=&quot;button&quot; :aria-pressed=&quot;completed&quot; @click=&quot;emit(&#x27;toggle&#x27;)&quot;&gt;
+    {{ completed ? &#x27;Done: &#x27; : &#x27;Open: &#x27; }}{{ title }}
+  &lt;/button&gt;
+&lt;/template&gt;</code></pre><p>Replace the playground's <code>App.vue</code> with the parent:</p><pre><code>&lt;script setup lang=&quot;ts&quot;&gt;
+import { ref } from &#x27;vue&#x27;
+import TodoRow from &#x27;./TodoRow.vue&#x27;
+const completed = ref(false)
+function toggle(): void {
+  completed.value = !completed.value
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;TodoRow title=&quot;Learn component events&quot;
+    :completed=&quot;completed&quot; @toggle=&quot;toggle&quot; /&gt;
+&lt;/template&gt;</code></pre>
+<p><code>defineProps</code> and <code>defineEmits</code> are compiler macros in script setup, so they need no import. Props are read-only inputs; the child requests a change instead of assigning to a prop. An event may also carry data: <code>defineEmits&lt;{ rename: [title: string] }&gt;()</code> describes a typed title payload.</p>
+<div class="checkpoint">Click the row twice. Expect Open → Done → Open. Identify the browser click, the child's toggle event, and the parent function that changes the state.</div>
+<p>Reference: <a href="https://vuejs.org/guide/components/events.html">Vue component events</a>.</p>
+</section>
+<section id="foundation-tailwind" class="card"><span class="step">BEFORE YOU CODE</span><h2>4. Tailwind CSS basics</h2>
+<p>Tailwind is a CSS framework built around utility classes. Combine classes on HTML elements to express styles. Vue controls behavior; Tailwind controls presentation. CSS concepts still matter.</p>
+<p>After Step 3 installs Tailwind, try this markup inside a Vue template:</p>
+<pre><code>&lt;section class=&quot;mx-auto max-w-xl space-y-4 rounded-lg bg-white p-6 shadow-sm&quot;&gt;
+  &lt;h2 class=&quot;text-2xl font-bold text-zinc-950&quot;&gt;My Todos&lt;/h2&gt;
+  &lt;div class=&quot;flex flex-col gap-3 sm:flex-row&quot;&gt;
+    &lt;label class=&quot;flex-1&quot;&gt;
+      &lt;span class=&quot;block text-sm&quot;&gt;Title&lt;/span&gt;
+      &lt;input class=&quot;w-full border border-zinc-300 px-3 py-2&quot; /&gt;
+    &lt;/label&gt;
+    &lt;button type=&quot;button&quot;
+      class=&quot;rounded bg-blue-700 px-4 py-2 text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2&quot;&gt;
+      Add
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+<table><thead><tr><th>Class group</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>p-6, px-4, py-2, gap-3</td><td>Padding and gaps using the spacing scale.</td></tr>
+<tr><td>mx-auto, max-w-xl, w-full</td><td>Center a constrained container and size its children.</td></tr>
+<tr><td>flex, flex-col, sm:flex-row</td><td>Stack by default; switch to a row at the sm breakpoint and above.</td></tr>
+<tr><td>text-2xl, font-bold, text-white</td><td>Font size, weight and color.</td></tr>
+<tr><td>hover:bg-blue-800, focus-visible:outline-2</td><td>Styles for pointer hover and keyboard focus.</td></tr></tbody></table>
+<p>Responsive prefixes are mobile-first: <code>sm:</code> does not mean “only small phones.” Keep complete class names in source code so Tailwind can discover them; use <code>:class="completed ? 'text-green-700' : 'text-zinc-900'"</code> rather than constructing partial color class names.</p>
+<div class="checkpoint">After Step 3: resize the browser and use Tab to focus the button. Expect stacked controls on a narrow screen, a row on a wider screen, and visible keyboard focus.</div>
+<p>Reference: <a href="https://tailwindcss.com/docs/styling-with-utility-classes">Tailwind utility classes</a>.</p>
+</section>
+<section id="foundation-query" class="card"><span class="step">BEFORE YOU CODE</span><h2>5. Queries, mutations and async UI</h2>
+<p>A <strong>query</strong> reads server data, such as GET /api/todos. A <strong>mutation</strong> changes it through POST, PUT or DELETE. Here “query” means fetching API data, not a SQL statement. A URL query string such as <code>?page=2</code> is a separate concept; the current Todo API does not implement pagination.</p>
+<p>Axios handles HTTP transport. Your UI must still represent loading, success, an empty result and failure. This pattern previews Step 7; its imports exist after Steps 5–6:</p>
+<pre><code>import { ref } from &#x27;vue&#x27;
+import { getTodos } from &#x27;@/services/api&#x27;
+import type { Todo } from &#x27;@/types/todo&#x27;
+
+const todos = ref&lt;Todo[]&gt;([])
+const isLoading = ref(false)
+const errorMessage = ref(&#x27;&#x27;)
+
+async function loadTodos(): Promise&lt;void&gt; {
+  isLoading.value = true
+  errorMessage.value = &#x27;&#x27;
+  try {
+    todos.value = await getTodos()
+  } catch (error: unknown) {
+    errorMessage.value = error instanceof Error
+      ? error.message : &#x27;Could not load Todos&#x27;
+  } finally {
+    isLoading.value = false
+  }
+}</code></pre>
+<p>After a mutation succeeds, either update local state using the response or fetch the list again. Do not display success before the server confirms it. In Step 7, creation adds the returned Todo and deletion removes it after the request succeeds.</p>
+<h3>When to add TanStack Query</h3>
+<p>TanStack Vue Query manages server-state caching and request lifecycle. A query key identifies cached data, a query function fetches it, and mutation success can invalidate a related query so active views refresh. It complements an HTTP client such as Axios. It is optional in this lab: first understand the manual loading/error pattern. Cached server data is not automatically durable storage or always fresh.</p>
+<div class="checkpoint">After Step 8: stop the API and press Refresh. Expect an error and loading to end. Restart it and retry. Explain how an empty successful list differs from a failed request.</div>
+<p>Reference: <a href="https://tanstack.com/query/latest/docs/framework/vue/overview">TanStack Vue Query overview</a>.</p>
+</section>
+<section id="foundation-composables" class="card"><span class="step">BEFORE YOU CODE</span><h2>6. Composables: reuse reactive logic</h2>
+<p>A composable is a function that packages reusable stateful Vue logic, conventionally named <code>useSomething</code>. An API service sends requests; a composable can coordinate those requests with reactive loading, errors and data. A component renders the results.</p>
+<p>For an independent playground exercise, create <code>useTodoDraft.ts</code>:</p>
+<pre><code>import { computed, ref } from &#x27;vue&#x27;
+
+export function useTodoDraft() {
+  const title = ref(&#x27;&#x27;)
+  const canSubmit = computed(() =&gt; title.value.trim().length &gt; 0)
+  function reset(): void {
+    title.value = &#x27;&#x27;
+  }
+  return { title, canSubmit, reset }
+}</code></pre><p>Use it from App.vue:</p><pre><code>&lt;script setup lang=&quot;ts&quot;&gt;
+import { useTodoDraft } from &#x27;./useTodoDraft&#x27;
+const { title, canSubmit, reset } = useTodoDraft()
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;label&gt;Draft title &lt;input v-model=&quot;title&quot; /&gt;&lt;/label&gt;
+  &lt;button type=&quot;button&quot; :disabled=&quot;!canSubmit&quot; @click=&quot;reset&quot;&gt;Clear&lt;/button&gt;
+&lt;/template&gt;</code></pre>
+<p>Call composables synchronously in script setup, especially when they register lifecycle hooks. Refs created inside this function are new for every call: sharing logic does not mean sharing one global state. A plain formatter without reactive state can remain an ordinary utility function.</p>
+<div class="checkpoint">Enter a title, then clear it. Expect the input to empty and Clear to disable. Later, consider extracting Step 7's loadTodos logic into useTodos.</div>
+<p>Reference: <a href="https://vuejs.org/guide/reusability/composables.html">Vue composables</a>.</p>
+</section>
+<section id="foundation-state" class="card"><span class="step">BEFORE YOU CODE</span><h2>7. State management: where should data live?</h2>
+<p>State is data that changes while the application runs. Start with the smallest owner that needs it. A form draft belongs to the form. Sibling components can receive data from their shared parent. A larger app can use Pinia for shared client state.</p>
+<table><thead><tr><th>State</th><th>Owner/tool</th><th>Example</th></tr></thead><tbody>
+<tr><td>Local UI</td><td>Component ref</td><td>New Todo title or an open dialog.</td></tr>
+<tr><td>Derived value</td><td>computed</td><td>Remaining Todo count.</td></tr>
+<tr><td>Shared client state</td><td>Pinia when needed</td><td>A filter used by multiple views.</td></tr>
+<tr><td>Server state</td><td>API plus local state or a query cache</td><td>Todos persisted by SQLite.</td></tr></tbody></table>
+<p>A Pinia setup store exposes state (refs), getters (computed values), and actions (functions). This optional preview requires <code>npm install pinia</code> and <code>app.use(createPinia())</code> before mounting the Vue app; it is not required for the one-screen lab:</p>
+<pre><code>import { ref } from &#x27;vue&#x27;
+import { defineStore } from &#x27;pinia&#x27;
+
+export const useFilterStore = defineStore(&#x27;todoFilter&#x27;, () =&gt; {
+  const filter = ref&lt;&#x27;all&#x27; | &#x27;active&#x27;&gt;(&#x27;all&#x27;)
+  function showActive(): void {
+    filter.value = &#x27;active&#x27;
+  }
+  return { filter, showActive }
+})</code></pre>
+<p>Inside a component, call <code>const filters = useFilterStore()</code>, read <code>filters.filter</code>, and call <code>filters.showActive()</code>. If destructuring reactive store state, use <code>storeToRefs</code>. Pinia does not automatically persist data after a reload, and storing a login flag does not grant API access.</p>
+<div class="checkpoint">Choose an owner for the input title, remaining count and shared filter. Explain why SQLite remains the authoritative store for saved Todos.</div>
+<p>Reference: <a href="https://pinia.vuejs.org/core-concepts/">Pinia store concepts</a>.</p>
+</section>
+<section id="foundation-routing" class="card"><span class="step">BEFORE YOU CODE</span><h2>8. Routing: connect URLs to views</h2>
+<p>A single-page application can show different views without reloading the entire document. Vue Router maps browser paths such as <code>/login</code> and <code>/todos</code> to Vue components. These frontend routes are distinct from backend API routes such as <code>/api/todos</code>.</p>
+<p>Optional preview for after the lab: install <code>vue-router</code>, create LoginView.vue and TodosView.vue in <code>src/views</code>, and configure <code>src/router.ts</code>:</p>
+<pre><code>import { createRouter, createWebHistory } from &#x27;vue-router&#x27;
+import LoginView from &#x27;./views/LoginView.vue&#x27;
+import TodosView from &#x27;./views/TodosView.vue&#x27;
+
+export const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: &#x27;/&#x27;, redirect: &#x27;/todos&#x27; },
+    { path: &#x27;/login&#x27;, component: LoginView },
+    { path: &#x27;/todos&#x27;, component: TodosView },
+  ],
+})</code></pre>
+<p>Import router in main.ts and register it with <code>app.use(router)</code> before <code>app.mount('#app')</code>. In App.vue, render navigation and the matched view:</p>
+<pre><code>&lt;template&gt;
+  &lt;nav&gt;
+    &lt;RouterLink to=&quot;/login&quot;&gt;Login&lt;/RouterLink&gt;
+    &lt;RouterLink to=&quot;/todos&quot;&gt;Todos&lt;/RouterLink&gt;
+  &lt;/nav&gt;
+  &lt;RouterView /&gt;
+&lt;/template&gt;</code></pre>
+<p>A dynamic path such as <code>/todos/:id</code> supplies a route parameter; URL parameters arrive as strings and need parsing before numeric use. A navigation guard may redirect a signed-out user, but the backend must still authorize requests. History-mode hosting must return the SPA entry document for frontend routes on direct visits; the current GitHub Pages site hosts lab documents, not this running API application.</p>
+<div class="checkpoint">Explain why visiting /todos selects a screen while GET /api/todos returns JSON. Router is deliberately set to No in Step 2 because this lab switches one screen with v-if.</div>
+<p>Reference: <a href="https://router.vuejs.org/guide/">Vue Router getting started</a>.</p>
+</section>
+<section id="foundation-ready" class="card"><span class="step">BEFORE YOU CODE</span><h2>9. Readiness check and next steps</h2>
+<p>Before starting the project, explain these in your own words. Open the answer guide after trying.</p>
+<ol><li>Which tool handles rendering, type checking, styling and HTTP?</li><li>Why does changing a ref update the screen? Where is .value needed?</li><li>How do props, a DOM click and a component emit differ?</li><li>Why should remainingCount be computed?</li><li>What happens to loading if an API request fails?</li><li>When would you introduce a composable, Pinia, Router or a query cache?</li></ol>
+<details><summary>Answer guide</summary><p>Vue renders; TypeScript checks; Tailwind styles; Axios sends HTTP. Vue tracks reactive dependencies; use .value in script for refs. Props carry parent inputs, a DOM click is a browser event, and emit notifies a component listener. computed keeps a derived count synchronized. finally clears loading even after an error. Composables reuse reactive logic, Pinia shares client state, Router maps URLs to views, and a query cache coordinates server data and refreshing.</p></details>
+<h3>Connect the foundations to the coding lab</h3>
+<p>Continue with <a href="#setup">Step 0: tools</a>. You will revisit Tailwind in Step 3, types in Step 5, queries in Step 6, and reactivity/events in Step 7. After CRUD works, split TodoRow with props/emits, extract useTodos, then experiment with Router and Pinia. Add query caching when you understand how a successful mutation updates the list.</p>
+<div class="checkpoint">Ready: you can describe what happens from clicking Add, through the HTTP request, to Vue rendering the saved Todo.</div>
+</section>
 
       <section id="flow" class="card">
         <h2>Understand the integration flow</h2>
@@ -569,7 +832,7 @@ npm run capture</code></pre>
         </ul>
         <h3>Build the production frontend</h3>
         <pre><code>npm run build</code></pre>
-        <p>Vite type-checks and creates the optimized frontend in <code>dist/</code>. When deploying, replace the development CORS origin and API URL with real production values.</p>
+        <p>The Vue scaffold’s build script runs type checking with vue-tsc and uses Vite to create the optimized frontend in <code>dist/</code>. When deploying, replace the development CORS origin and API URL with real production values.</p>
       </section>
     </article>
   </main>
