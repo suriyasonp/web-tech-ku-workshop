@@ -97,14 +97,33 @@ try {
     '--strictPort',
   ], { stdio: 'inherit' }))
 
-  await waitFor('http://127.0.0.1:5173')
-  const browser = await chromium.launch({ headless: true })
+  await Promise.all([
+    waitFor('http://localhost:5000'),
+    waitFor('http://127.0.0.1:5173'),
+  ])
+  const customChromium = process.env.CHROMIUM_EXECUTABLE_PATH
+  const browser = await chromium.launch({
+    headless: true,
+    ...(customChromium
+      ? {
+          executablePath: customChromium,
+          args: ['--no-sandbox', '--disable-gpu', '--disable-software-rasterizer'],
+        }
+      : {}),
+  })
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 })
 
   await page.goto('http://127.0.0.1:5173', { waitUntil: 'networkidle' })
   await page.getByRole('button', { name: 'Sign in' }).click()
   await page.getByPlaceholder('What needs to be done?').fill('Capture the completed workshop app')
-  await page.getByRole('button', { name: 'Add' }).click()
+  await Promise.all([
+    page.waitForResponse((response) =>
+      response.url().endsWith('/api/todos') &&
+      response.request().method() === 'POST' &&
+      response.status() === 201),
+    page.getByRole('button', { name: 'Add' }).click(),
+  ])
+  await page.reload({ waitUntil: 'networkidle' })
   await page.getByText('Capture the completed workshop app').waitFor()
 
   await mkdir(path.dirname(outputPath), { recursive: true })
