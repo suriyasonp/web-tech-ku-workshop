@@ -5,3 +5,5 @@
 backend/TodoApi/todo.db*
 .DS_Store
 .cache/
+.dotnet-sdk/
+.dotnet-home/
