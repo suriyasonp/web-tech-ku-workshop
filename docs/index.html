@@ -1,155 +1,267 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KU Web Technology Workshop — .NET 10 Minimal API Self-Lab</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="frontend.css" />
-</head>
-<body>
-  <header class="hero">
-    <div class="wrap">
-      <span class="eyebrow">KU Web Technology Development Workshop</span>
-      <h1>Build a Todo API with .NET 10 Minimal API</h1>
-      <p class="lead">A beginner-friendly, self-paced hands-on lab using VS Code, REST, DTOs, SQLite, Entity Framework Core, and JWT Bearer authentication.</p>
-      <div class="hero-grid">
-        <div><strong>Level</strong><span>Beginner</span></div>
-        <div><strong>Platform</strong><span>Windows / macOS</span></div>
-        <div><strong>IDE</strong><span>Visual Studio Code</span></div>
-        <div><strong>Backend</strong><span>.NET 10 Minimal API</span></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KU Web Technology Workshop — .NET 10 Minimal API Self-Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="frontend.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap">
+        <span class="eyebrow">KU Web Technology Development Workshop</span>
+        <h1>Build a Todo API with .NET 10 Minimal API</h1>
+        <p class="lead">
+          A beginner-friendly, self-paced hands-on lab using VS Code, REST,
+          DTOs, SQLite, Entity Framework Core, and JWT Bearer authentication.
+        </p>
+        <div class="hero-grid">
+          <div><strong>Level</strong><span>Beginner</span></div>
+          <div><strong>Platform</strong><span>Windows / macOS</span></div>
+          <div><strong>IDE</strong><span>Visual Studio Code</span></div>
+          <div><strong>Backend</strong><span>.NET 10 Minimal API</span></div>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="wrap layout">
-    <nav class="toc" aria-label="Lab navigation">
-      <strong>Lab Navigation</strong>
-      <a class="lab-switch" href="frontend.html">Open Frontend Lab →</a>
-      <a href="#outcomes">Learning outcomes</a>
-      <a href="#setup">0. Setup</a>
-      <a href="#project">1. Create project</a>
-      <a href="#hello">2. Hello endpoint</a>
-      <a href="#rest">3. REST & API design</a>
-      <a href="#dto">4. GET DTO</a>
-      <a href="#inmemory">5. In-memory GET</a>
-      <a href="#crud">6. POST, PUT, DELETE</a>
-      <a href="#group">7. MapGroup</a>
-      <a href="#database">8. SQLite + EF Core</a>
-      <a href="#migration">9. Migration</a>
-      <a href="#dbcrud">10. CRUD with database</a>
-      <a href="#auth">11. Authentication concepts</a>
-      <a href="#jwt">12. JWT Bearer login</a>
-      <a href="#protect">13. Protect endpoints</a>
-      <a href="#test">14. Test complete flow</a>
-      <a href="#openapi">15. OpenAPI reference</a>
-      <a href="#complete-project">16. Run completed project</a>
-      <a href="#troubleshooting">Troubleshooting</a>
-      <a href="#final">Final checkpoint</a>
-    </nav>
+    <main class="wrap layout">
+      <nav class="toc" aria-label="Lab navigation">
+        <strong>Lab Navigation</strong>
+        <a class="lab-switch" href="frontend.html">Open Frontend Lab →</a>
+        <a href="#outcomes">Learning outcomes</a>
+        <a href="#setup">0. Setup</a>
+        <a href="#project">1. Create project</a>
+        <a href="#hello">2. Hello endpoint</a>
+        <a href="#rest">3. REST & API design</a>
+        <a href="#dto">4. GET DTO</a>
+        <a href="#inmemory">5. In-memory GET</a>
+        <a href="#crud">6. POST, PUT, DELETE</a>
+        <a href="#group">7. MapGroup</a>
+        <a href="#database">8. SQLite + EF Core</a>
+        <a href="#migration">9. Migration</a>
+        <a href="#dbcrud">10. CRUD with database</a>
+        <a href="#auth">11. Authentication concepts</a>
+        <a href="#jwt">12. JWT Bearer login</a>
+        <a href="#protect">13. Protect endpoints</a>
+        <a href="#test">14. Test complete flow</a>
+        <a href="#openapi">15. OpenAPI reference</a>
+        <a href="#complete-project">16. Run completed project</a>
+        <a href="#troubleshooting">Troubleshooting</a>
+        <a href="#final">Final checkpoint</a>
+      </nav>
 
-    <article>
-      <section id="outcomes" class="card">
-        <h2>Learning outcomes</h2>
-        <p>By the end of this lab you should be able to explain and build the complete request flow:</p>
-        <pre><code>Client
+      <article>
+        <section id="outcomes" class="card">
+          <h2>Learning outcomes</h2>
+          <p>
+            By the end of this lab you should be able to explain and build the
+            complete request flow:
+          </p>
+          <pre><code>Client
   ↓ HTTP + JSON
 Minimal API Endpoint
   ↓ DTO
 Entity Framework Core
   ↓
 SQLite Database</code></pre>
-        <p>You will also add authentication so protected Todo endpoints require a valid Bearer token.</p>
-        <div class="checkpoint"><strong>Target API</strong><br>GET /api/todos · GET /api/todos/{id} · POST /api/todos · PUT /api/todos/{id} · DELETE /api/todos/{id} · POST /api/auth/login</div>
-      </section>
+          <p>
+            You will also add authentication so protected Todo endpoints require
+            a valid Bearer token.
+          </p>
+          <div class="checkpoint">
+            <strong>Target API</strong><br />GET /api/todos · GET
+            /api/todos/{id} · POST /api/todos · PUT /api/todos/{id} · DELETE
+            /api/todos/{id} · POST /api/auth/login
+          </div>
+        </section>
 
-      <section id="setup" class="card">
-        <span class="step">STEP 0</span><h2>Prepare your development environment</h2>
-        <h3>Required tools</h3>
-        <ul>
-          <li><a href="https://dotnet.microsoft.com/download/dotnet/10.0" target="_blank" rel="noreferrer">.NET 10 SDK — Microsoft</a></li>
-          <li><a href="https://code.visualstudio.com/Download" target="_blank" rel="noreferrer">Visual Studio Code — Microsoft</a></li>
-          <li><a href="https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit" target="_blank" rel="noreferrer">C# Dev Kit — Microsoft</a></li>
-          <li>Optional: <a href="https://marketplace.visualstudio.com/items?itemName=humao.rest-client" target="_blank" rel="noreferrer">REST Client for VS Code</a></li>
-        </ul>
-        <h3>Verify .NET</h3>
-        <pre><code>dotnet --version</code></pre>
-        <p>Expected result:</p>
-        <pre><code>10.0.xxx</code></pre>
-        <div class="note"><strong>Windows:</strong> use PowerShell or Windows Terminal. <strong>macOS:</strong> use Terminal or the integrated VS Code terminal. All <code>dotnet</code> commands in this lab are the same on both platforms.</div>
-        <div class="checkpoint">Checkpoint: <code>dotnet --version</code> shows .NET 10.</div>
-      </section>
+        <section id="setup" class="card">
+          <span class="step">STEP 0</span>
+          <h2>Prepare your development environment</h2>
+          <h3>Required tools</h3>
+          <ul>
+            <li>
+              <a
+                href="https://dotnet.microsoft.com/download/dotnet/10.0"
+                target="_blank"
+                rel="noreferrer"
+                >.NET 10 SDK — Microsoft</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://code.visualstudio.com/Download"
+                target="_blank"
+                rel="noreferrer"
+                >Visual Studio Code — Microsoft</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit"
+                target="_blank"
+                rel="noreferrer"
+                >C# Dev Kit — Microsoft</a
+              >
+            </li>
+            <li>
+              Optional:
+              <a
+                href="https://marketplace.visualstudio.com/items?itemName=humao.rest-client"
+                target="_blank"
+                rel="noreferrer"
+                >REST Client for VS Code</a
+              >
+            </li>
+          </ul>
+          <h3>Verify .NET</h3>
+          <pre><code>dotnet --version</code></pre>
+          <p>Expected result:</p>
+          <pre><code>10.0.xxx</code></pre>
+          <div class="note">
+            <strong>Windows:</strong> use PowerShell or Windows Terminal.
+            <strong>macOS:</strong> use Terminal or the integrated VS Code
+            terminal. All <code>dotnet</code> commands in this lab are the same
+            on both platforms.
+          </div>
+          <div class="checkpoint">
+            Checkpoint: <code>dotnet --version</code> shows .NET 10.
+          </div>
+        </section>
 
-      <section id="project" class="card">
-        <span class="step">STEP 1</span><h2>Create the Todo API project</h2>
-        <pre><code>mkdir todo-workshop
+        <section id="project" class="card">
+          <span class="step">STEP 1</span>
+          <h2>Create the Todo API project</h2>
+          <pre><code>mkdir todo-workshop
 cd todo-workshop
 dotnet new webapi -n TodoApi
 cd TodoApi
 code .</code></pre>
-        <p>If <code>code .</code> is not available, open VS Code manually and choose <strong>File → Open Folder</strong>.</p>
-        <h3>Build and run</h3>
-        <pre><code>dotnet build
+          <p>
+            If <code>code .</code> is not available, open VS Code manually and
+            choose <strong>File → Open Folder</strong>.
+          </p>
+          <h3>Build and run</h3>
+          <pre><code>dotnet build
 dotnet run</code></pre>
-        <p>Look for:</p>
-        <pre><code>Now listening on: http://localhost:xxxx</code></pre>
-        <div class="checkpoint">Checkpoint: the project builds without errors and the local web server starts.</div>
-      </section>
+          <p>Look for:</p>
+          <pre><code>Now listening on: http://localhost:xxxx</code></pre>
+          <div class="checkpoint">
+            Checkpoint: the project builds without errors and the local web
+            server starts.
+          </div>
+        </section>
 
-      <section id="hello" class="card">
-        <span class="step">STEP 2</span><h2>Create your first endpoint</h2>
-        <p>Replace the contents of <code>Program.cs</code> with:</p>
-        <pre><code>var builder = WebApplication.CreateBuilder(args);
+        <section id="hello" class="card">
+          <span class="step">STEP 2</span>
+          <h2>Create your first endpoint</h2>
+          <p>Replace the contents of <code>Program.cs</code> with:</p>
+          <pre><code>var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 
 app.MapGet("/", () =&gt; "Hello Todo API");
 
 app.Run();</code></pre>
-        <p>Run the project again:</p>
-        <pre><code>dotnet run</code></pre>
-        <p>Open the localhost URL shown in your terminal. You should see:</p>
-        <pre><code>Hello Todo API</code></pre>
-        <h3>What happened?</h3>
-        <ul>
-          <li><code>CreateBuilder</code> prepares application services and configuration.</li>
-          <li><code>Build</code> creates the web application.</li>
-          <li><code>MapGet</code> maps an HTTP GET request to code.</li>
-          <li><code>Run</code> starts the web server.</li>
-        </ul>
-      </section>
+          <p>Run the project again:</p>
+          <pre><code>dotnet run</code></pre>
+          <p>Open the localhost URL shown in your terminal. You should see:</p>
+          <pre><code>Hello Todo API</code></pre>
+          <h3>What happened?</h3>
+          <ul>
+            <li>
+              <code>CreateBuilder</code> prepares application services and
+              configuration.
+            </li>
+            <li><code>Build</code> creates the web application.</li>
+            <li><code>MapGet</code> maps an HTTP GET request to code.</li>
+            <li><code>Run</code> starts the web server.</li>
+          </ul>
+        </section>
 
-      <section id="rest" class="card">
-        <span class="step">STEP 3</span><h2>Understand REST and design the API first</h2>
-        <p>Our main resource is a <strong>Todo</strong>. We design endpoints around the resource, not action names.</p>
-        <table><thead><tr><th>CRUD</th><th>HTTP</th><th>Endpoint</th><th>Purpose</th></tr></thead><tbody>
-          <tr><td>Create</td><td>POST</td><td>/api/todos</td><td>Create a Todo</td></tr>
-          <tr><td>Read</td><td>GET</td><td>/api/todos</td><td>Get all Todos</td></tr>
-          <tr><td>Read</td><td>GET</td><td>/api/todos/{id}</td><td>Get one Todo</td></tr>
-          <tr><td>Update</td><td>PUT</td><td>/api/todos/{id}</td><td>Update a Todo</td></tr>
-          <tr><td>Delete</td><td>DELETE</td><td>/api/todos/{id}</td><td>Delete a Todo</td></tr>
-        </tbody></table>
-        <div class="note">Prefer <code>GET /api/todos</code> instead of action-style URLs such as <code>GET /api/getTodos</code>.</div>
-      </section>
+        <section id="rest" class="card">
+          <span class="step">STEP 3</span>
+          <h2>Understand REST and design the API first</h2>
+          <p>
+            Our main resource is a <strong>Todo</strong>. We design endpoints
+            around the resource, not action names.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>CRUD</th>
+                <th>HTTP</th>
+                <th>Endpoint</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Create</td>
+                <td>POST</td>
+                <td>/api/todos</td>
+                <td>Create a Todo</td>
+              </tr>
+              <tr>
+                <td>Read</td>
+                <td>GET</td>
+                <td>/api/todos</td>
+                <td>Get all Todos</td>
+              </tr>
+              <tr>
+                <td>Read</td>
+                <td>GET</td>
+                <td>/api/todos/{id}</td>
+                <td>Get one Todo</td>
+              </tr>
+              <tr>
+                <td>Update</td>
+                <td>PUT</td>
+                <td>/api/todos/{id}</td>
+                <td>Update a Todo</td>
+              </tr>
+              <tr>
+                <td>Delete</td>
+                <td>DELETE</td>
+                <td>/api/todos/{id}</td>
+                <td>Delete a Todo</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="note">
+            Prefer <code>GET /api/todos</code> instead of action-style URLs such
+            as <code>GET /api/getTodos</code>.
+          </div>
+        </section>
 
-      <section id="dto" class="card">
-        <span class="step">STEP 4</span><h2>Create the GET DTO</h2>
-        <p>Create a folder named <code>Dtos</code>, then create <code>Dtos/TodoGetDto.cs</code>:</p>
-        <pre><code>namespace TodoApi.Dtos;
+        <section id="dto" class="card">
+          <span class="step">STEP 4</span>
+          <h2>Create the GET DTO</h2>
+          <p>
+            Create a folder named <code>Dtos</code>, then create
+            <code>Dtos/TodoGetDto.cs</code>:
+          </p>
+          <pre><code>namespace TodoApi.Dtos;
 
 public record TodoGetDto(
     int Id,
     string Title,
     bool IsCompleted
 );</code></pre>
-        <h3>Why use a DTO?</h3>
-        <p>DTO means <strong>Data Transfer Object</strong>. It defines the shape of data that crosses the API boundary. Database entities and API contracts do not need to expose exactly the same fields.</p>
-      </section>
+          <h3>Why use a DTO?</h3>
+          <p>
+            DTO means <strong>Data Transfer Object</strong>. It defines the
+            shape of data that crosses the API boundary. Database entities and
+            API contracts do not need to expose exactly the same fields.
+          </p>
+        </section>
 
-      <section id="inmemory" class="card">
-        <span class="step">STEP 5</span><h2>Return data with GET DTO</h2>
-        <p>Update <code>Program.cs</code>:</p>
-        <pre><code>using TodoApi.Dtos;
+        <section id="inmemory" class="card">
+          <span class="step">STEP 5</span>
+          <h2>Return data with GET DTO</h2>
+          <p>Update <code>Program.cs</code>:</p>
+          <pre><code>using TodoApi.Dtos;
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
@@ -175,30 +287,33 @@ app.MapGet("/api/todos/{id}", (int id) =&gt;
 });
 
 app.Run();</code></pre>
-        <h3>Try it</h3>
-        <pre><code>GET /api/todos
+          <h3>Try it</h3>
+          <pre><code>GET /api/todos
 GET /api/todos/1
 GET /api/todos/99</code></pre>
-        <p>The last request should return <strong>404 Not Found</strong>.</p>
-        <div class="checkpoint">Checkpoint: GET all and GET by ID both work with in-memory data.</div>
-      </section>
+          <p>The last request should return <strong>404 Not Found</strong>.</p>
+          <div class="checkpoint">
+            Checkpoint: GET all and GET by ID both work with in-memory data.
+          </div>
+        </section>
 
-      <section id="crud" class="card">
-        <span class="step">STEP 6</span><h2>Add POST, PUT, and DELETE</h2>
-        <h3>Create DTOs</h3>
-        <p><code>Dtos/TodoCreateDto.cs</code></p>
-        <pre><code>namespace TodoApi.Dtos;
+        <section id="crud" class="card">
+          <span class="step">STEP 6</span>
+          <h2>Add POST, PUT, and DELETE</h2>
+          <h3>Create DTOs</h3>
+          <p><code>Dtos/TodoCreateDto.cs</code></p>
+          <pre><code>namespace TodoApi.Dtos;
 
 public record TodoCreateDto(string Title);</code></pre>
-        <p><code>Dtos/TodoUpdateDto.cs</code></p>
-        <pre><code>namespace TodoApi.Dtos;
+          <p><code>Dtos/TodoUpdateDto.cs</code></p>
+          <pre><code>namespace TodoApi.Dtos;
 
 public record TodoUpdateDto(
     string Title,
     bool IsCompleted
 );</code></pre>
-        <h3>POST</h3>
-        <pre><code>app.MapPost("/api/todos", (TodoCreateDto dto) =&gt;
+          <h3>POST</h3>
+          <pre><code>app.MapPost("/api/todos", (TodoCreateDto dto) =&gt;
 {
     var nextId = todos.Count == 0 ? 1 : todos.Max(x =&gt; x.Id) + 1;
     var todo = new TodoGetDto(nextId, dto.Title, false);
@@ -206,8 +321,13 @@ public record TodoUpdateDto(
 
     return Results.Created($"/api/todos/{todo.Id}", todo);
 });</code></pre>
-        <h3>PUT</h3>
-        <pre><code>app.MapPut("/api/todos/{id}", (int id, TodoUpdateDto dto) =&gt;
+
+          <p>Endpoint: <code>http://localhost:[port]/api/todos</code>></p>
+          <p>Method: <code>POST</code></p>
+          <p>Payload: <code>{ "title": "Learn API" }</code></p>
+
+          <h3>PUT</h3>
+          <pre><code>app.MapPut("/api/todos/{id}", (int id, TodoUpdateDto dto) =&gt;
 {
     var index = todos.FindIndex(x =&gt; x.Id == id);
     if (index == -1) return Results.NotFound();
@@ -220,8 +340,15 @@ public record TodoUpdateDto(
 
     return Results.Ok(todos[index]);
 });</code></pre>
-        <h3>DELETE</h3>
-        <pre><code>app.MapDelete("/api/todos/{id}", (int id) =&gt;
+          <p>Endpoint: <code>http://localhost:[port]/api/todos/{id}</code>></p>
+          <p>Method: <code>PUT</code></p>
+          <p>Parameter: <code>id</code></p>
+          <p>
+            Payload: <code>{ "title": "Learn API", "isComplete": true }</code>
+          </p>
+
+          <h3>DELETE</h3>
+          <pre><code>app.MapDelete("/api/todos/{id}", (int id) =&gt;
 {
     var todo = todos.FirstOrDefault(x =&gt; x.Id == id);
     if (todo is null) return Results.NotFound();
@@ -229,27 +356,43 @@ public record TodoUpdateDto(
     todos.Remove(todo);
     return Results.NoContent();
 });</code></pre>
-        <div class="checkpoint">Checkpoint: you can create, update, and delete Todos while the application is running.</div>
-      </section>
 
-      <section id="group" class="card">
-        <span class="step">STEP 7</span><h2>Organize endpoints with MapGroup</h2>
-        <p>Replace repeated <code>/api/todos</code> prefixes with a route group:</p>
-        <pre><code>var todoGroup = app.MapGroup("/api/todos");
+          <p>Endpoint: <code>http://localhost:[port]/api/todos/{id}</code>></p>
+          <p>Method: <code>DELETE</code></p>
+          <p>Parameter: <code>id</code></p>         
+
+          <div class="checkpoint">
+            Checkpoint: you can create, update, and delete Todos while the
+            application is running.
+          </div>
+        </section>
+
+        <section id="group" class="card">
+          <span class="step">STEP 7</span>
+          <h2>Organize endpoints with MapGroup</h2>
+          <p>
+            Replace repeated <code>/api/todos</code> prefixes with a route
+            group:
+          </p>
+          <pre><code>var todoGroup = app.MapGroup("/api/todos");
 
 todoGroup.MapGet("/", ...);
 todoGroup.MapGet("/{id}", ...);
 todoGroup.MapPost("/", ...);
 todoGroup.MapPut("/{id}", ...);
 todoGroup.MapDelete("/{id}", ...);</code></pre>
-        <p>This makes endpoint organization cleaner and will later let us apply authorization to the whole group.</p>
-      </section>
+          <p>
+            This makes endpoint organization cleaner and will later let us apply
+            authorization to the whole group.
+          </p>
+        </section>
 
-      <section id="database" class="card">
-        <span class="step">STEP 8</span><h2>Replace in-memory storage with SQLite</h2>
-        <h3>Create the database entity</h3>
-        <p>Create <code>Models/TodoItem.cs</code>:</p>
-        <pre><code>namespace TodoApi.Models;
+        <section id="database" class="card">
+          <span class="step">STEP 8</span>
+          <h2>Replace in-memory storage with SQLite</h2>
+          <h3>Create the database entity</h3>
+          <p>Create <code>Models/TodoItem.cs</code>:</p>
+          <pre><code>namespace TodoApi.Models;
 
 public class TodoItem
 {
@@ -258,15 +401,15 @@ public class TodoItem
     public bool IsCompleted { get; set; }
     public DateTime CreatedAt { get; set; }
 }</code></pre>
-        <h3>Install EF Core SQLite packages</h3>
-        <pre><code>dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+          <h3>Install EF Core SQLite packages</h3>
+          <pre><code>dotnet add package Microsoft.EntityFrameworkCore.Sqlite
 dotnet add package Microsoft.EntityFrameworkCore.Design</code></pre>
-        <h3>Install the EF CLI tool</h3>
-        <pre><code>dotnet tool install --global dotnet-ef
+          <h3>Install the EF CLI tool</h3>
+          <pre><code>dotnet tool install --global dotnet-ef
 dotnet ef --version</code></pre>
-        <h3>Create DbContext</h3>
-        <p>Create <code>Data/AppDbContext.cs</code>:</p>
-        <pre><code>using Microsoft.EntityFrameworkCore;
+          <h3>Create DbContext</h3>
+          <p>Create <code>Data/AppDbContext.cs</code>:</p>
+          <pre><code>using Microsoft.EntityFrameworkCore;
 using TodoApi.Models;
 
 namespace TodoApi.Data;
@@ -278,39 +421,47 @@ public class AppDbContext : DbContext
 
     public DbSet&lt;TodoItem&gt; Todos =&gt; Set&lt;TodoItem&gt;();
 }</code></pre>
-        <h3>Add the connection string</h3>
-        <p>In <code>appsettings.json</code>:</p>
-        <pre><code>{
+          <h3>Add the connection string</h3>
+          <p>In <code>appsettings.json</code>:</p>
+          <pre><code>{
   "ConnectionStrings": {
     "DefaultConnection": "Data Source=todo.db"
   }
 }</code></pre>
-        <h3>Register EF Core</h3>
-        <p>Add near the top of <code>Program.cs</code>:</p>
-        <pre><code>using Microsoft.EntityFrameworkCore;
+          <h3>Register EF Core</h3>
+          <p>Add near the top of <code>Program.cs</code>:</p>
+          <pre><code>using Microsoft.EntityFrameworkCore;
 using TodoApi.Data;</code></pre>
-        <p>Before <code>builder.Build()</code>:</p>
-        <pre><code>builder.Services.AddDbContext&lt;AppDbContext&gt;(options =&gt;
+          <p>Before <code>builder.Build()</code>:</p>
+          <pre><code>builder.Services.AddDbContext&lt;AppDbContext&gt;(options =&gt;
     options.UseSqlite(
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));</code></pre>
-      </section>
+        </section>
 
-      <section id="migration" class="card">
-        <span class="step">STEP 9</span><h2>Create the database with EF Core Migration</h2>
-        <pre><code>dotnet ef migrations add InitialCreate
+        <section id="migration" class="card">
+          <span class="step">STEP 9</span>
+          <h2>Create the database with EF Core Migration</h2>
+          <pre><code>dotnet ef migrations add InitialCreate
 dotnet ef database update</code></pre>
-        <p>You should now see:</p>
-        <pre><code>Migrations/
+          <p>You should now see:</p>
+          <pre><code>Migrations/
 todo.db</code></pre>
-        <div class="checkpoint">Checkpoint: <code>todo.db</code> exists and migration commands complete successfully.</div>
-      </section>
+          <div class="checkpoint">
+            Checkpoint: <code>todo.db</code> exists and migration commands
+            complete successfully.
+          </div>
+        </section>
 
-      <section id="dbcrud" class="card">
-        <span class="step">STEP 10</span><h2>CRUD using the database</h2>
-        <p>Remove the in-memory <code>List&lt;TodoGetDto&gt;</code>. Replace the Todo route handlers with database-backed versions.</p>
-        <h3>GET all</h3>
-        <pre><code>todoGroup.MapGet("/", async (AppDbContext db) =&gt;
+        <section id="dbcrud" class="card">
+          <span class="step">STEP 10</span>
+          <h2>CRUD using the database</h2>
+          <p>
+            Remove the in-memory <code>List&lt;TodoGetDto&gt;</code>. Replace
+            the Todo route handlers with database-backed versions.
+          </p>
+          <h3>GET all</h3>
+          <pre><code>todoGroup.MapGet("/", async (AppDbContext db) =&gt;
 {
     var todos = await db.Todos
         .Select(x =&gt; new TodoGetDto(x.Id, x.Title, x.IsCompleted))
@@ -318,8 +469,8 @@ todo.db</code></pre>
 
     return Results.Ok(todos);
 });</code></pre>
-        <h3>GET by ID</h3>
-        <pre><code>todoGroup.MapGet("/{id}", async (int id, AppDbContext db) =&gt;
+          <h3>GET by ID</h3>
+          <pre><code>todoGroup.MapGet("/{id}", async (int id, AppDbContext db) =&gt;
 {
     var todo = await db.Todos.FindAsync(id);
     if (todo is null) return Results.NotFound();
@@ -328,8 +479,8 @@ todo.db</code></pre>
         new TodoGetDto(todo.Id, todo.Title, todo.IsCompleted)
     );
 });</code></pre>
-        <h3>POST</h3>
-        <pre><code>todoGroup.MapPost("/", async (TodoCreateDto dto, AppDbContext db) =&gt;
+          <h3>POST</h3>
+          <pre><code>todoGroup.MapPost("/", async (TodoCreateDto dto, AppDbContext db) =&gt;
 {
     var todo = new TodoItem
     {
@@ -344,8 +495,8 @@ todo.db</code></pre>
     var result = new TodoGetDto(todo.Id, todo.Title, todo.IsCompleted);
     return Results.Created($"/api/todos/{todo.Id}", result);
 });</code></pre>
-        <h3>PUT</h3>
-        <pre><code>todoGroup.MapPut("/{id}", async (int id, TodoUpdateDto dto, AppDbContext db) =&gt;
+          <h3>PUT</h3>
+          <pre><code>todoGroup.MapPut("/{id}", async (int id, TodoUpdateDto dto, AppDbContext db) =&gt;
 {
     var todo = await db.Todos.FindAsync(id);
     if (todo is null) return Results.NotFound();
@@ -358,8 +509,8 @@ todo.db</code></pre>
         new TodoGetDto(todo.Id, todo.Title, todo.IsCompleted)
     );
 });</code></pre>
-        <h3>DELETE</h3>
-        <pre><code>todoGroup.MapDelete("/{id}", async (int id, AppDbContext db) =&gt;
+          <h3>DELETE</h3>
+          <pre><code>todoGroup.MapDelete("/{id}", async (int id, AppDbContext db) =&gt;
 {
     var todo = await db.Todos.FindAsync(id);
     if (todo is null) return Results.NotFound();
@@ -368,28 +519,50 @@ todo.db</code></pre>
     await db.SaveChangesAsync();
     return Results.NoContent();
 });</code></pre>
-        <div class="checkpoint">Checkpoint: restart the API. Previously created Todos should still exist. That proves data is persisted in SQLite.</div>
-      </section>
+          <div class="checkpoint">
+            Checkpoint: restart the API. Previously created Todos should still
+            exist. That proves data is persisted in SQLite.
+          </div>
+        </section>
 
-      <section id="auth" class="card">
-        <span class="step">STEP 11</span><h2>Authentication vs Authorization</h2>
-        <div class="two-col">
-          <div><h3>Authentication</h3><p><strong>Who are you?</strong></p><p>The system verifies a user's identity.</p></div>
-          <div><h3>Authorization</h3><p><strong>What are you allowed to do?</strong></p><p>The system decides which resources/actions the authenticated user may access.</p></div>
-        </div>
-        <h3>What is a Bearer token?</h3>
-        <p>After login, the client receives an access token. Protected requests send the token in the HTTP <code>Authorization</code> header:</p>
-        <pre><code>Authorization: Bearer eyJhbGciOi...</code></pre>
-        <p>For this lab we use a JWT access token. The API validates its signature, issuer, audience, and expiry.</p>
-      </section>
+        <section id="auth" class="card">
+          <span class="step">STEP 11</span>
+          <h2>Authentication vs Authorization</h2>
+          <div class="two-col">
+            <div>
+              <h3>Authentication</h3>
+              <p><strong>Who are you?</strong></p>
+              <p>The system verifies a user's identity.</p>
+            </div>
+            <div>
+              <h3>Authorization</h3>
+              <p><strong>What are you allowed to do?</strong></p>
+              <p>
+                The system decides which resources/actions the authenticated
+                user may access.
+              </p>
+            </div>
+          </div>
+          <h3>What is a Bearer token?</h3>
+          <p>
+            After login, the client receives an access token. Protected requests
+            send the token in the HTTP <code>Authorization</code> header:
+          </p>
+          <pre><code>Authorization: Bearer eyJhbGciOi...</code></pre>
+          <p>
+            For this lab we use a JWT access token. The API validates its
+            signature, issuer, audience, and expiry.
+          </p>
+        </section>
 
-      <section id="jwt" class="card">
-        <span class="step">STEP 12</span><h2>Add JWT Bearer login</h2>
-        <h3>Install package</h3>
-        <pre><code>dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer</code></pre>
-        <h3>Add JWT configuration</h3>
-        <p>Extend <code>appsettings.json</code>:</p>
-        <pre><code>{
+        <section id="jwt" class="card">
+          <span class="step">STEP 12</span>
+          <h2>Add JWT Bearer login</h2>
+          <h3>Install package</h3>
+          <pre><code>dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer</code></pre>
+          <h3>Add JWT configuration</h3>
+          <p>Extend <code>appsettings.json</code>:</p>
+          <pre><code>{
   "ConnectionStrings": {
     "DefaultConnection": "Data Source=todo.db"
   },
@@ -399,16 +572,20 @@ todo.db</code></pre>
     "Key": "todo-workshop-development-key-change-in-production"
   }
 }</code></pre>
-        <div class="warning"><strong>Workshop only:</strong> do not commit production secrets. In real applications, use environment variables, Secret Manager, or another secure secret store.</div>
-        <h3>Configure authentication</h3>
-        <p>Add these using statements:</p>
-        <pre><code>using Microsoft.AspNetCore.Authentication.JwtBearer;
+          <div class="warning">
+            <strong>Workshop only:</strong> do not commit production secrets. In
+            real applications, use environment variables, Secret Manager, or
+            another secure secret store.
+          </div>
+          <h3>Configure authentication</h3>
+          <p>Add these using statements:</p>
+          <pre><code>using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;</code></pre>
-        <p>Before <code>builder.Build()</code>:</p>
-        <pre><code>var jwtKey = builder.Configuration["Jwt:Key"]!;
+          <p>Before <code>builder.Build()</code>:</p>
+          <pre><code>var jwtKey = builder.Configuration["Jwt:Key"]!;
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -428,20 +605,20 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();</code></pre>
-        <p>After <code>builder.Build()</code>:</p>
-        <pre><code>app.UseAuthentication();
+          <p>After <code>builder.Build()</code>:</p>
+          <pre><code>app.UseAuthentication();
 app.UseAuthorization();</code></pre>
-        <h3>Create login DTOs</h3>
-        <p><code>Dtos/LoginDto.cs</code></p>
-        <pre><code>namespace TodoApi.Dtos;
+          <h3>Create login DTOs</h3>
+          <p><code>Dtos/LoginDto.cs</code></p>
+          <pre><code>namespace TodoApi.Dtos;
 
 public record LoginDto(string Username, string Password);</code></pre>
-        <p><code>Dtos/LoginResponseDto.cs</code></p>
-        <pre><code>namespace TodoApi.Dtos;
+          <p><code>Dtos/LoginResponseDto.cs</code></p>
+          <pre><code>namespace TodoApi.Dtos;
 
 public record LoginResponseDto(string AccessToken);</code></pre>
-        <h3>Create login endpoint</h3>
-        <pre><code>app.MapPost("/api/auth/login", (
+          <h3>Create login endpoint</h3>
+          <pre><code>app.MapPost("/api/auth/login", (
     LoginDto login,
     IConfiguration configuration) =&gt;
 {
@@ -470,23 +647,38 @@ public record LoginResponseDto(string AccessToken);</code></pre>
     var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
     return Results.Ok(new LoginResponseDto(tokenString));
 });</code></pre>
-        <div class="note">This lab intentionally uses one hard-coded user so you can focus on the JWT request flow. A production system must use a proper user store and password hashing.</div>
-      </section>
+          <div class="note">
+            This lab intentionally uses one hard-coded user so you can focus on
+            the JWT request flow. A production system must use a proper user
+            store and password hashing.
+          </div>
+        </section>
 
-      <section id="protect" class="card">
-        <span class="step">STEP 13</span><h2>Protect all Todo endpoints</h2>
-        <p>Change your Todo route group to:</p>
-        <pre><code>var todoGroup = app
+        <section id="protect" class="card">
+          <span class="step">STEP 13</span>
+          <h2>Protect all Todo endpoints</h2>
+          <p>Change your Todo route group to:</p>
+          <pre><code>var todoGroup = app
     .MapGroup("/api/todos")
     .RequireAuthorization();</code></pre>
-        <p>Now calling <code>GET /api/todos</code> without a token should return <strong>401 Unauthorized</strong>.</p>
-        <div class="checkpoint">Checkpoint: login endpoint is public, while every Todo endpoint requires authentication.</div>
-      </section>
+          <p>
+            Now calling <code>GET /api/todos</code> without a token should
+            return <strong>401 Unauthorized</strong>.
+          </p>
+          <div class="checkpoint">
+            Checkpoint: login endpoint is public, while every Todo endpoint
+            requires authentication.
+          </div>
+        </section>
 
-      <section id="test" class="card">
-        <span class="step">STEP 14</span><h2>Test the complete workflow</h2>
-        <p>Create <code>TodoApi.http</code>. Replace the host port with the one printed by <code>dotnet run</code>.</p>
-        <pre><code>@host = http://localhost:5000
+        <section id="test" class="card">
+          <span class="step">STEP 14</span>
+          <h2>Test the complete workflow</h2>
+          <p>
+            Create <code>TodoApi.http</code>. Replace the host port with the one
+            printed by <code>dotnet run</code>.
+          </p>
+          <pre><code>@host = http://localhost:5000
 
 ### Hello
 GET {{host}}/
@@ -529,84 +721,188 @@ Content-Type: application/json
 ### Delete Todo
 DELETE {{host}}/api/todos/1
 Authorization: Bearer YOUR_TOKEN</code></pre>
-        <h3>Status codes you should observe</h3>
-        <table><thead><tr><th>Scenario</th><th>Status</th></tr></thead><tbody>
-          <tr><td>Successful GET</td><td>200 OK</td></tr>
-          <tr><td>Successful create</td><td>201 Created</td></tr>
-          <tr><td>Successful delete</td><td>204 No Content</td></tr>
-          <tr><td>Missing resource</td><td>404 Not Found</td></tr>
-          <tr><td>Missing/invalid token</td><td>401 Unauthorized</td></tr>
-        </tbody></table>
-      </section>
+          <h3>Status codes you should observe</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Successful GET</td>
+                <td>200 OK</td>
+              </tr>
+              <tr>
+                <td>Successful create</td>
+                <td>201 Created</td>
+              </tr>
+              <tr>
+                <td>Successful delete</td>
+                <td>204 No Content</td>
+              </tr>
+              <tr>
+                <td>Missing resource</td>
+                <td>404 Not Found</td>
+              </tr>
+              <tr>
+                <td>Missing/invalid token</td>
+                <td>401 Unauthorized</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
 
-      <section id="openapi" class="card">
-        <span class="step">STEP 15</span><h2>Add interactive endpoint documentation</h2>
-        <p>OpenAPI describes the available routes, methods, parameters, request bodies, and responses in a standard format. Scalar renders that OpenAPI document as an interactive API reference.</p>
-        <h3>Install OpenAPI and Scalar</h3>
-        <pre><code>dotnet add package Microsoft.AspNetCore.OpenApi
+        <section id="openapi" class="card">
+          <span class="step">STEP 15</span>
+          <h2>Add interactive endpoint documentation</h2>
+          <p>
+            OpenAPI describes the available routes, methods, parameters, request
+            bodies, and responses in a standard format. Scalar renders that
+            OpenAPI document as an interactive API reference.
+          </p>
+          <h3>Install OpenAPI and Scalar</h3>
+          <pre><code>dotnet add package Microsoft.AspNetCore.OpenApi
 dotnet add package Scalar.AspNetCore</code></pre>
-        <p>Add the namespaces and service registration in <code>Program.cs</code>:</p>
-        <pre><code>using Scalar.AspNetCore;
+          <p>
+            Add the namespaces and service registration in
+            <code>Program.cs</code>:
+          </p>
+          <pre><code>using Scalar.AspNetCore;
 
 builder.Services.AddOpenApi();</code></pre>
-        <p>After <code>var app = builder.Build();</code>, map the OpenAPI document and visual reference:</p>
-        <pre><code>app.MapOpenApi();
+          <p>
+            After <code>var app = builder.Build();</code>, map the OpenAPI
+            document and visual reference:
+          </p>
+          <pre><code>app.MapOpenApi();
 app.MapScalarApiReference();</code></pre>
-        <p>Add names and summaries to endpoints so the reference is easier to understand:</p>
-        <pre><code>todoGroup.MapGet("/", async (AppDbContext db) =&gt; ...)
+          <p>
+            Add names and summaries to endpoints so the reference is easier to
+            understand:
+          </p>
+          <pre><code>todoGroup.MapGet("/", async (AppDbContext db) =&gt; ...)
     .WithName("GetTodos")
     .WithSummary("Get all Todos")
     .Produces&lt;List&lt;TodoGetDto&gt;&gt;();</code></pre>
-        <p>Restart the API, then open:</p>
-        <ul>
-          <li><code>http://localhost:5000/scalar/v1</code> — interactive API reference</li>
-          <li><code>http://localhost:5000/openapi/v1.json</code> — generated OpenAPI JSON</li>
-        </ul>
-        <div class="checkpoint">Checkpoint: the reference lists Login plus all five Todo CRUD operations.</div>
-      </section>
+          <p>Restart the API, then open:</p>
+          <ul>
+            <li>
+              <code>http://localhost:5000/scalar/v1</code> — interactive API
+              reference
+            </li>
+            <li>
+              <code>http://localhost:5000/openapi/v1.json</code> — generated
+              OpenAPI JSON
+            </li>
+          </ul>
+          <div class="checkpoint">
+            Checkpoint: the reference lists Login plus all five Todo CRUD
+            operations.
+          </div>
+        </section>
 
-      <section id="complete-project" class="card">
-        <span class="step">STEP 16</span><h2>Run the completed project from this repository</h2>
-        <p>The finished application is provided in <code>backend/</code> and <code>frontend/</code>. From the repository root:</p>
-        <pre><code>npm install
+        <section id="complete-project" class="card">
+          <span class="step">STEP 16</span>
+          <h2>Run the completed project from this repository</h2>
+          <p>
+            The finished application is provided in <code>backend/</code> and
+            <code>frontend/</code>. From the repository root:
+          </p>
+          <pre><code>npm install
 npm run setup
 npm run dev</code></pre>
-        <p>The cross-platform development script starts the API and Vue application together. Press <kbd>Ctrl</kbd> + <kbd>C</kbd> once to stop both.</p>
-        <h3>Capture the result</h3>
-        <pre><code>npm run setup:capture
+          <p>
+            The cross-platform development script starts the API and Vue
+            application together. Press <kbd>Ctrl</kbd> + <kbd>C</kbd> once to
+            stop both.
+          </p>
+          <h3>Capture the result</h3>
+          <pre><code>npm run setup:capture
 npm run capture</code></pre>
-        <p>The capture script starts the full stack, signs in through Chromium, adds a demonstration Todo, and writes <code>docs/images/todo-app-demo.png</code>.</p>
-        <figure>
-          <img class="result-image" src="images/todo-app-demo.png" alt="Completed Vue Todo application after authenticated API integration" />
-          <figcaption>Completed Vue + TypeScript Todo application connected to the API.</figcaption>
-        </figure>
-      </section>
+          <p>
+            The capture script starts the full stack, signs in through Chromium,
+            adds a demonstration Todo, and writes
+            <code>docs/images/todo-app-demo.png</code>.
+          </p>
+          <figure>
+            <img
+              class="result-image"
+              src="images/todo-app-demo.png"
+              alt="Completed Vue Todo application after authenticated API integration"
+            />
+            <figcaption>
+              Completed Vue + TypeScript Todo application connected to the API.
+            </figcaption>
+          </figure>
+        </section>
 
-      <section id="troubleshooting" class="card">
-        <h2>Troubleshooting</h2>
-        <details><summary><code>dotnet</code> command not found</summary><p>Install the .NET 10 SDK, close and reopen your terminal, then run <code>dotnet --version</code> again.</p></details>
-        <details><summary><code>code .</code> command not found on macOS</summary><p>In VS Code open the Command Palette and run <strong>Shell Command: Install 'code' command in PATH</strong>, or open the folder manually.</p></details>
-        <details><summary><code>dotnet ef</code> command not found</summary><p>Run <code>dotnet tool install --global dotnet-ef</code>. If already installed, reopen the terminal and retry.</p></details>
-        <details><summary>SQLite migration fails</summary><p>Confirm <code>Microsoft.EntityFrameworkCore.Sqlite</code> and <code>Microsoft.EntityFrameworkCore.Design</code> are installed and that <code>AppDbContext</code> is registered before <code>builder.Build()</code>.</p></details>
-        <details><summary>GET /api/todos returns 401</summary><p>That is expected after <code>RequireAuthorization()</code>. Login first and send the returned access token as <code>Authorization: Bearer &lt;token&gt;</code>.</p></details>
-        <details><summary>Token is rejected immediately</summary><p>Check that Issuer, Audience, Key, and token creation settings match the validation settings exactly.</p></details>
-      </section>
+        <section id="troubleshooting" class="card">
+          <h2>Troubleshooting</h2>
+          <details>
+            <summary><code>dotnet</code> command not found</summary>
+            <p>
+              Install the .NET 10 SDK, close and reopen your terminal, then run
+              <code>dotnet --version</code> again.
+            </p>
+          </details>
+          <details>
+            <summary><code>code .</code> command not found on macOS</summary>
+            <p>
+              In VS Code open the Command Palette and run
+              <strong>Shell Command: Install 'code' command in PATH</strong>, or
+              open the folder manually.
+            </p>
+          </details>
+          <details>
+            <summary><code>dotnet ef</code> command not found</summary>
+            <p>
+              Run <code>dotnet tool install --global dotnet-ef</code>. If
+              already installed, reopen the terminal and retry.
+            </p>
+          </details>
+          <details>
+            <summary>SQLite migration fails</summary>
+            <p>
+              Confirm <code>Microsoft.EntityFrameworkCore.Sqlite</code> and
+              <code>Microsoft.EntityFrameworkCore.Design</code> are installed
+              and that <code>AppDbContext</code> is registered before
+              <code>builder.Build()</code>.
+            </p>
+          </details>
+          <details>
+            <summary>GET /api/todos returns 401</summary>
+            <p>
+              That is expected after <code>RequireAuthorization()</code>. Login
+              first and send the returned access token as
+              <code>Authorization: Bearer &lt;token&gt;</code>.
+            </p>
+          </details>
+          <details>
+            <summary>Token is rejected immediately</summary>
+            <p>
+              Check that Issuer, Audience, Key, and token creation settings
+              match the validation settings exactly.
+            </p>
+          </details>
+        </section>
 
-      <section id="final" class="card final-card">
-        <h2>Final checkpoint</h2>
-        <p>You are finished when all of these are true:</p>
-        <ul class="checklist">
-          <li>Project builds with .NET 10.</li>
-          <li>GET, POST, PUT, DELETE endpoints work.</li>
-          <li>API input/output uses DTOs.</li>
-          <li>Todos persist in SQLite after application restart.</li>
-          <li>Login returns a JWT access token.</li>
-          <li>Todo endpoints return 401 without a valid Bearer token.</li>
-          <li>Authenticated CRUD requests succeed.</li>
-          <li>Scalar displays the generated OpenAPI endpoint reference.</li>
-        </ul>
-        <h3>Architecture you should now understand</h3>
-        <pre><code>Browser / Vue Client
+        <section id="final" class="card final-card">
+          <h2>Final checkpoint</h2>
+          <p>You are finished when all of these are true:</p>
+          <ul class="checklist">
+            <li>Project builds with .NET 10.</li>
+            <li>GET, POST, PUT, DELETE endpoints work.</li>
+            <li>API input/output uses DTOs.</li>
+            <li>Todos persist in SQLite after application restart.</li>
+            <li>Login returns a JWT access token.</li>
+            <li>Todo endpoints return 401 without a valid Bearer token.</li>
+            <li>Authenticated CRUD requests succeed.</li>
+            <li>Scalar displays the generated OpenAPI endpoint reference.</li>
+          </ul>
+          <h3>Architecture you should now understand</h3>
+          <pre><code>Browser / Vue Client
         │
         │ HTTP + JSON
         ▼
@@ -622,11 +918,21 @@ ASP.NET Core 10 Minimal API
                 │
                 ▼
              SQLite</code></pre>
-        <p><strong>Next lab:</strong> <a href="frontend.html">build a Vue 3 + TypeScript frontend with Tailwind CSS and connect it to this API using Axios →</a></p>
-      </section>
-    </article>
-  </main>
+          <p>
+            <strong>Next lab:</strong>
+            <a href="frontend.html"
+              >build a Vue 3 + TypeScript frontend with Tailwind CSS and connect
+              it to this API using Axios →</a
+            >
+          </p>
+        </section>
+      </article>
+    </main>
 
-  <footer><div class="wrap">KU Web Technology Development Workshop · Self-Paced Hands-On Lab</div></footer>
-</body>
+    <footer>
+      <div class="wrap">
+        KU Web Technology Development Workshop · Self-Paced Hands-On Lab
+      </div>
+    </footer>
+  </body>
 </html>
