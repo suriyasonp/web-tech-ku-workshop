@@ -51,6 +51,13 @@
         <a href="#types">5. TypeScript models</a>
         <a href="#client">6. API client</a>
         <a href="#ui">7. Build the UI</a>
+        <a href="#ui-login">7.1 Login UI</a>
+        <a href="#ui-api">7.4 Login API + token</a>
+        <a href="#ui-display">7.5 Display Todos</a>
+        <a href="#ui-create">7.6 Add Todo</a>
+        <a href="#ui-edit">7.7 Edit Todo</a>
+        <a href="#ui-delete">7.8 Delete Todo</a>
+        <a href="#ui-events">7.9 Events</a>
         <a href="#run">8. Run full stack</a>
         <a href="#verify">9. Verify CRUD</a>
         <a href="#complete-project">10. Run completed project</a>
@@ -1195,7 +1202,282 @@ export async function deleteTodo(id: number): Promise&lt;void&gt; {
         <section id="ui" class="card">
           <span class="step">STEP 7</span>
           <h2>Build the login and Todo UI</h2>
-          <p>Replace <code>src/App.vue</code> with:</p>
+          <p>
+            Build this screen in small substeps. First create the login form,
+            then connect authentication, and finally add the Todo read and CRUD
+            actions. Keep the API calls in <code>src/services/api.ts</code> and
+            keep the page state in <code>src/App.vue</code>.
+          </p>
+
+          <h3 id="ui-login">7.1 Create the login UI</h3>
+          <p>
+            Start with a form bound to <code>username</code> and
+            <code>password</code>. The <code>.prevent</code> modifier keeps the
+            browser from reloading the page; submitting the form calls
+            <code>handleLogin</code>.
+          </p>
+          <pre><code>&lt;form v-if="!isAuthenticated" @submit.prevent="handleLogin"&gt;
+  &lt;label&gt;
+    &lt;span&gt;Username&lt;/span&gt;
+    &lt;input v-model="username" autocomplete="username" required /&gt;
+  &lt;/label&gt;
+  &lt;label&gt;
+    &lt;span&gt;Password&lt;/span&gt;
+    &lt;input v-model="password" type="password"
+      autocomplete="current-password" required /&gt;
+  &lt;/label&gt;
+  &lt;button type="submit" :disabled="isLoading"&gt;
+    {{ isLoading ? 'Signing in…' : 'Sign in' }}
+  &lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+          <h3 id="ui-css">7.2 Explain the CSS utility classes</h3>
+          <p>
+            Tailwind classes describe the appearance beside the markup. Read
+            them from the outside in: layout, spacing, color, typography, and
+            interaction state. For example,
+            <code>w-full border px-3 py-2 focus:border-zinc-950</code> makes an
+            input fill its container, adds a border and padding, and changes
+            the border color when focused.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Class group</th>
+                <th>What it controls in this UI</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>max-w-2xl mx-auto</code></td>
+                <td>Readable content width and horizontal centering.</td>
+              </tr>
+              <tr>
+                <td><code>flex gap-2 items-center</code></td>
+                <td>Places controls in a row with consistent spacing.</td>
+              </tr>
+              <tr>
+                <td><code>border bg-white shadow-sm</code></td>
+                <td>Creates the form and Todo card surfaces.</td>
+              </tr>
+              <tr>
+                <td><code>hover:* focus:* disabled:*</code></td>
+                <td>Communicates hover, keyboard-focus, and loading states.</td>
+              </tr>
+              <tr>
+                <td><code>sm:* min-w-0 break-words</code></td>
+                <td>Improves responsive layout and prevents long titles from overflowing.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 id="ui-state">7.3 Define the page variables</h3>
+          <p>
+            Use <code>ref</code> for values that change after a user action and
+            <code>computed</code> for values derived from the Todo list.
+            <code>hasToken()</code> lets a refreshed page decide whether to
+            show the login form or the Todo screen.
+          </p>
+          <pre><code>const todos = ref&lt;Todo[]&gt;([])
+const username = ref('student')
+const password = ref('password')
+const newTitle = ref('')
+const isAuthenticated = ref(hasToken())
+const isLoading = ref(false)
+const errorMessage = ref('')
+
+const remainingCount = computed(
+  () =&gt; todos.value.filter((todo) =&gt; !todo.isCompleted).length,
+)</code></pre>
+
+          <h3 id="ui-api">7.4 Connect the login API and verify the token</h3>
+          <p>
+            Call the <code>login</code> function from the API client. It sends
+            <code>POST /api/auth/login</code>; the client stores the returned
+            <code>accessToken</code> in Local Storage. After the request
+            succeeds, set <code>isAuthenticated</code> and load the protected
+            Todo data.
+          </p>
+          <pre><code>async function handleLogin(): Promise&lt;void&gt; {
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    await login({ username: username.value, password: password.value })
+    // login() stores response.data.accessToken in localStorage.
+    isAuthenticated.value = hasToken()
+    if (isAuthenticated.value) await loadTodos()
+  } catch (error) {
+    showError(error)
+  } finally {
+    isLoading.value = false
+  }
+}</code></pre>
+          <div class="checkpoint">
+            <strong>Checkpoint:</strong> open DevTools → Application → Local
+            Storage after signing in. Confirm that the key
+            <code>accessToken</code> exists. Do not print the token in the UI or
+            commit it to source control. A protected request should include
+            <code>Authorization: Bearer &lt;accessToken&gt;</code>.
+          </div>
+          <p>
+            The complete API map for this step is:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Request</th>
+                <th>Client function</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Login</td>
+                <td><code>POST /api/auth/login</code></td>
+                <td><code>login</code></td>
+              </tr>
+              <tr>
+                <td>Display</td>
+                <td><code>GET /api/todos</code></td>
+                <td><code>getTodos</code></td>
+              </tr>
+              <tr>
+                <td>Add</td>
+                <td><code>POST /api/todos</code></td>
+                <td><code>createTodo</code></td>
+              </tr>
+              <tr>
+                <td>Edit / complete</td>
+                <td><code>PUT /api/todos/:id</code></td>
+                <td><code>updateTodo</code></td>
+              </tr>
+              <tr>
+                <td>Delete</td>
+                <td><code>DELETE /api/todos/:id</code></td>
+                <td><code>deleteTodo</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 id="ui-display">7.5 Display Todo data</h3>
+          <p>
+            Fetch the list after login and when the page mounts with an existing
+            token. Use <code>v-for</code> and a stable <code>:key</code> to render
+            each server record.
+          </p>
+          <pre><code>async function loadTodos(): Promise&lt;void&gt; {
+  isLoading.value = true
+  try {
+    todos.value = await getTodos()
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() =&gt; {
+  if (isAuthenticated.value) void loadTodos()
+})</code></pre>
+          <pre><code>&lt;ul v-if="!isLoading"&gt;
+  &lt;li v-for="todo in todos" :key="todo.id"&gt;
+    {{ todo.title }}
+  &lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+
+          <h3 id="ui-create">7.6 Add a Todo</h3>
+          <p>
+            Bind the input to <code>newTitle</code>, trim it before sending,
+            then append the Todo returned by <code>POST /api/todos</code>. Clear
+            the input only after the server confirms success.
+          </p>
+          <pre><code>async function handleCreate(): Promise&lt;void&gt; {
+  const title = newTitle.value.trim()
+  if (!title) return
+  try {
+    todos.value.push(await createTodo({ title }))
+    newTitle.value = ''
+  } catch (error) {
+    showError(error)
+  }
+}</code></pre>
+
+          <h3 id="ui-edit">7.7 Edit a Todo</h3>
+          <p>
+            Send the Todo's id and its updated fields to
+            <code>PUT /api/todos/:id</code>. Replace the local item with the
+            response so the UI reflects the server's saved value.
+          </p>
+          <pre><code>async function handleRename(todo: Todo): Promise&lt;void&gt; {
+  const title = window.prompt('Rename Todo', todo.title)?.trim()
+  if (!title || title === todo.title) return
+  try {
+    const updated = await updateTodo(todo.id, {
+      title,
+      isCompleted: todo.isCompleted,
+    })
+    Object.assign(todo, updated)
+  } catch (error) {
+    showError(error)
+  }
+}</code></pre>
+
+          <h3 id="ui-delete">7.8 Delete a Todo</h3>
+          <p>
+            Ask for confirmation before calling <code>DELETE /api/todos/:id</code>.
+            Remove the item from local state only after the API succeeds.
+          </p>
+          <pre><code>async function handleDelete(todo: Todo): Promise&lt;void&gt; {
+  if (!window.confirm(`Delete "${todo.title}"?`)) return
+  try {
+    await deleteTodo(todo.id)
+    todos.value = todos.value.filter((item) =&gt; item.id !== todo.id)
+  } catch (error) {
+    showError(error)
+  }
+}</code></pre>
+
+          <h3 id="ui-events">7.9 Connect events to actions</h3>
+          <p>
+            Events are the bridge between the template and the functions in
+            <code>&lt;script setup&gt;</code>. The parent component owns the
+            state; each event handler calls the API and then updates that state.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Template event</th>
+                <th>Handler</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>@submit.prevent</code></td>
+                <td><code>handleLogin</code> / <code>handleCreate</code></td>
+                <td>Login or add a Todo without a page reload.</td>
+              </tr>
+              <tr>
+                <td><code>@change</code></td>
+                <td><code>handleToggle</code></td>
+                <td>Updates the completion state with <code>PUT</code>.</td>
+              </tr>
+              <tr>
+                <td><code>@click</code></td>
+                <td><code>handleRename</code> / <code>handleDelete</code></td>
+                <td>Edits or removes the selected Todo.</td>
+              </tr>
+              <tr>
+                <td><code>@click="loadTodos"</code></td>
+                <td><code>loadTodos</code></td>
+                <td>Reads the latest list from the API.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Complete <code>src/App.vue</code></h3>
+          <p>
+            Once the substeps make sense, replace <code>src/App.vue</code> with
+            this complete version:
+          </p>
           <pre><code>&lt;script setup lang="ts"&gt;
 import { computed, onMounted, ref } from 'vue'
 import {
