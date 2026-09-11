@@ -31,6 +31,7 @@
         <strong>Lab Navigation</strong>
         <a class="lab-switch" href="frontend.html">Open Frontend Lab →</a>
         <a href="#outcomes">Learning outcomes</a>
+        <a href="#foundations">Before Step 0: foundations</a>
         <a href="#setup">0. Setup</a>
         <a href="#project">1. Create project</a>
         <a href="#hello">2. Hello endpoint</a>
@@ -74,6 +75,142 @@ SQLite Database</code></pre>
             /api/todos/{id} · POST /api/todos · PUT /api/todos/{id} · DELETE
             /api/todos/{id} · POST /api/auth/login
           </div>
+        </section>
+
+        <section id="foundations" class="card">
+          <span class="step">BEFORE STEP 0</span>
+          <h2>Backend foundations: start here</h2>
+          <p>
+            Read this 45–60 minute tutorial before installing tools or writing
+            the Todo API. It explains the ideas you will use in every later
+            step; you do not need prior C# or web-backend experience.
+          </p>
+
+          <h3>1. What are we building?</h3>
+          <p>
+            A backend is a program that receives requests from a client,
+            applies rules, and sends a response. In this lab, the browser or
+            REST Client is the client; the Todo API is the backend.
+          </p>
+          <pre><code>Client → HTTP request → Minimal API endpoint → response (usually JSON)</code></pre>
+          <p>
+            A <strong>resource</strong> is the thing an API manages. Here it is
+            a Todo. An endpoint is one address and HTTP method that operates on
+            that resource, such as <code>GET /api/todos</code>.
+          </p>
+
+          <h3>2. HTTP and JSON essentials</h3>
+          <table>
+            <thead><tr><th>Part</th><th>Meaning</th><th>Todo example</th></tr></thead>
+            <tbody>
+              <tr><td>Method</td><td>The requested operation</td><td><code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code></td></tr>
+              <tr><td>URL / route</td><td>The resource to target</td><td><code>/api/todos/3</code></td></tr>
+              <tr><td>Request body</td><td>Data sent to the API</td><td><code>{ "title": "Learn API" }</code></td></tr>
+              <tr><td>Status code</td><td>The result of the request</td><td><code>200</code>, <code>201</code>, <code>404</code></td></tr>
+              <tr><td>Response body</td><td>Data returned by the API</td><td><code>{ "id": 3, "title": "Learn API" }</code></td></tr>
+            </tbody>
+          </table>
+          <p>
+            JSON is text used to exchange structured data. Property names are
+            wrapped in double quotes, strings use double quotes, and objects
+            use curly braces. Read the examples rather than memorizing JSON;
+            the API reference will show the exact shapes later.
+          </p>
+          <div class="checkpoint">
+            Quick check: <code>GET /api/todos/3</code> asks to read Todo 3;
+            <code>POST /api/todos</code> sends data to create a new Todo.
+          </div>
+
+          <h3>3. REST means resource-oriented URLs</h3>
+          <p>
+            REST is a convention for designing APIs around resources. Prefer
+            nouns in routes and let the HTTP method describe the action.
+          </p>
+          <pre><code>Good: GET /api/todos
+Good: DELETE /api/todos/3
+Avoid: GET /api/getTodos
+Avoid: POST /api/deleteTodo?id=3</code></pre>
+          <p>
+            The lab will use <code>200 OK</code> for successful reads,
+            <code>201 Created</code> for a successful create,
+            <code>204 No Content</code> for a successful delete,
+            <code>404 Not Found</code> when an item does not exist, and
+            <code>401 Unauthorized</code> when a protected route has no valid token.
+          </p>
+
+          <h3>4. Read a Minimal API in four lines</h3>
+          <pre><code>var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.MapGet("/", () => "Hello Todo API");
+app.Run();</code></pre>
+          <ul>
+            <li><code>builder</code> collects services and configuration.</li>
+            <li><code>app</code> is the web application that handles requests.</li>
+            <li><code>MapGet</code> connects a GET route to a small C# function.</li>
+            <li><code>Run</code> starts the local web server.</li>
+          </ul>
+          <p>
+            The expression <code>() =&gt; "Hello Todo API"</code> is a lambda:
+            a short function that returns the text on the right. Later, a route
+            parameter such as <code>(int id)</code> is automatically read from
+            <code>/api/todos/{id}</code>.
+          </p>
+
+          <h3>5. C# you need for this lab</h3>
+          <table>
+            <thead><tr><th>Concept</th><th>Example</th><th>Why it matters</th></tr></thead>
+            <tbody>
+              <tr><td>Type and variable</td><td><code>int id = 3;</code></td><td>Stores a typed value.</td></tr>
+              <tr><td>String</td><td><code>string title = "Learn API";</code></td><td>Stores text.</td></tr>
+              <tr><td>Record / DTO</td><td><code>public record TodoCreateDto(string Title);</code></td><td>Defines API input or output data.</td></tr>
+              <tr><td>Conditional</td><td><code>if (todo is null) return Results.NotFound();</code></td><td>Handles missing data safely.</td></tr>
+              <tr><td>Collection</td><td><code>new List&lt;TodoGetDto&gt;()</code></td><td>Holds multiple Todos.</td></tr>
+              <tr><td>Async</td><td><code>await db.SaveChangesAsync();</code></td><td>Waits for database work without blocking the server.</td></tr>
+            </tbody>
+          </table>
+          <p>
+            Do not worry about every keyword yet. Follow the code in sequence,
+            keep names consistent, and use compiler errors as precise hints
+            about what C# expects.
+          </p>
+
+          <h3>6. Services, dependency injection, and configuration</h3>
+          <p>
+            A <strong>service</strong> is a reusable capability, such as
+            <code>AppDbContext</code> for database access. We register services
+            before building the app, then Minimal API supplies them as endpoint
+            parameters:
+          </p>
+          <pre><code>builder.Services.AddDbContext&lt;AppDbContext&gt;(...);
+
+app.MapGet("/api/todos", async (AppDbContext db) =>
+{
+    return Results.Ok(await db.Todos.ToListAsync());
+});</code></pre>
+          <p>
+            This is dependency injection: the endpoint declares what it needs,
+            rather than creating it itself. Settings belong in
+            <code>appsettings.json</code>; real secrets must not be committed
+            to Git and should use environment variables or Secret Manager.
+          </p>
+
+          <h3>7. Your mental model for the rest of the lab</h3>
+          <pre><code>Route + HTTP method
+  → endpoint receives route values and JSON DTO
+  → validates/uses services
+  → returns a status code and JSON response</code></pre>
+          <div class="checkpoint">
+            <strong>Ready for Step 0?</strong> You should be able to identify
+            the method, route, request body, response and status code in a
+            simple API request. Then continue to install and verify the tools.
+          </div>
+          <p>
+            Helpful official references:
+            <a href="https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis" target="_blank" rel="noreferrer">Minimal APIs</a>,
+            <a href="https://learn.microsoft.com/aspnet/core/web-api/?view=aspnetcore-10.0" target="_blank" rel="noreferrer">Web API overview</a>,
+            and <a href="https://learn.microsoft.com/dotnet/csharp/tour-of-csharp/" target="_blank" rel="noreferrer">C# tour</a>.
+          </p>
         </section>
 
         <section id="setup" class="card">

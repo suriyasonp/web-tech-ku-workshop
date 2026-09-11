@@ -30,7 +30,7 @@ Students build a complete Todo application step by step.
 
 The student-facing labs are:
 
-- [`docs/index.html`](docs/index.html) — Backend lab
+- [`docs/index.html`](docs/index.html) — Backend lab — begin with the [backend foundations tutorial](docs/index.html#foundations) before Step 0
 - [`docs/frontend.html`](docs/frontend.html) — Frontend and backend-integration lab
 
 Complete the backend lab first, then read the [frontend foundations tutorial](docs/frontend.html#foundations) before starting the frontend setup. Allow 60–90 minutes for TypeScript, Vue reactivity, props/events/emits, Tailwind utilities, async queries, composables, state management and routing. Each topic includes a Todo example or decision exercise, checkpoints and official references. Router, Pinia and TanStack Query are optional follow-up concepts; the core lab uses local Vue state and Axios.
