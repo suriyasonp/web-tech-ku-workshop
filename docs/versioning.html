@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Web Technology Basic Workshop - Versioning Guide</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="frontend.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Web Technology Development Basic Workshop</span>
+        <p>Instructor: <a href="https://suriyasonphu.com">Suriya Sonphu</a></p>
+        <h1>Version Backend and Frontend Releases</h1>
+        <p class="lead">
+          Use Semantic Versioning to communicate what changed in the Todo API
+          and Vue frontend, and to decide whether a release is a bug fix, a
+          compatible feature, or a breaking change.
+        </p>
+        <div class="hero-grid">
+          <div><strong>Standard</strong><span>SemVer 2.0.0</span></div>
+          <div><strong>Backend</strong><span>.NET project version</span></div>
+          <div><strong>Frontend</strong><span>package.json version</span></div>
+          <div><strong>Practice</strong><span>Release notes</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap layout">
+      <nav class="toc" aria-label="Versioning navigation">
+        <strong>Versioning Guide</strong>
+        <a class="lab-switch" href="index.html">Backend Lab</a>
+        <a class="lab-switch" href="frontend.html">Frontend Lab</a>
+        <a href="#why">Why versions matter</a>
+        <a href="#semver">Semantic Versioning</a>
+        <a href="#backend">Backend versioning</a>
+        <a href="#frontend">Frontend versioning</a>
+        <a href="#workflow">Release workflow</a>
+        <a href="#examples">Workshop examples</a>
+        <a href="#checklist">Release checklist</a>
+      </nav>
+
+      <article>
+        <section id="why" class="card">
+          <span class="step">VERSIONING</span>
+          <h2>Why versions matter</h2>
+          <p>
+            A version number is a short contract with the next developer,
+            tester, or student who runs the project. It answers three practical
+            questions:
+          </p>
+          <ul>
+            <li>Can I upgrade without changing my code?</li>
+            <li>Did this release only fix a bug, or did it add behavior?</li>
+            <li>Do the backend API and frontend application still match?</li>
+          </ul>
+          <p>
+            This workshop uses
+            <a href="https://semver.org/" target="_blank" rel="noreferrer"
+              >Semantic Versioning 2.0.0</a
+            >
+            for both the .NET backend and the Vue frontend.
+          </p>
+        </section>
+
+        <section id="semver" class="card">
+          <span class="step">SEMVER</span>
+          <h2>Semantic Versioning in one page</h2>
+          <p>
+            A normal version has three numbers:
+            <code>MAJOR.MINOR.PATCH</code>.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>When to increase it</th>
+                <th>Todo project example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>MAJOR</code></td>
+                <td>Backward-incompatible public API or app behavior.</td>
+                <td>
+                  Rename <code>isCompleted</code> to <code>done</code> in API
+                  responses.
+                </td>
+              </tr>
+              <tr>
+                <td><code>MINOR</code></td>
+                <td>Backward-compatible feature.</td>
+                <td>Add <code>GET /api/todos?completed=true</code>.</td>
+              </tr>
+              <tr>
+                <td><code>PATCH</code></td>
+                <td>Backward-compatible bug fix.</td>
+                <td>Fix edit validation while keeping the same API contract.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            Use pre-release labels for builds that are not final:
+            <code>1.1.0-alpha.1</code>, <code>1.1.0-beta.1</code>, or
+            <code>1.1.0-rc.1</code>. Use build metadata when you need traceable
+            build information that does not change precedence:
+            <code>1.1.0+20260912</code>.
+          </p>
+          <div class="checkpoint">
+            After a version is released, do not edit that released artifact in
+            place. Make another change and release a new version.
+          </div>
+        </section>
+
+        <section id="backend" class="card">
+          <span class="step">BACKEND</span>
+          <h2>Version the .NET API</h2>
+          <p>
+            For this workshop, the backend public API is the HTTP contract:
+            routes, methods, status codes, authentication rules, and JSON DTO
+            shapes documented by the Minimal API and OpenAPI output.
+          </p>
+          <p>
+            Add a version to <code>backend/TodoApi/TodoApi.csproj</code> when
+            preparing a backend release:
+          </p>
+          <pre><code>&lt;PropertyGroup&gt;
+  &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
+  &lt;Nullable&gt;enable&lt;/Nullable&gt;
+  &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+  &lt;Version&gt;1.0.0&lt;/Version&gt;
+&lt;/PropertyGroup&gt;</code></pre>
+          <h3>Backend version decisions</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Change</th>
+                <th>Version bump</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Fix <code>PUT /api/todos/{id}</code> validation.</td>
+                <td><code>PATCH</code></td>
+                <td>The endpoint contract stays the same.</td>
+              </tr>
+              <tr>
+                <td>Add <code>GET /api/todos/{id}</code>.</td>
+                <td><code>MINOR</code></td>
+                <td>Existing clients still work.</td>
+              </tr>
+              <tr>
+                <td>Require a new claim for every Todo endpoint.</td>
+                <td><code>MAJOR</code></td>
+                <td>Existing clients must change their authentication flow.</td>
+              </tr>
+              <tr>
+                <td>Remove <code>title</code> from Todo responses.</td>
+                <td><code>MAJOR</code></td>
+                <td>The response shape breaks existing frontend code.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="note">
+            The workshop can start at <code>0.1.0</code> while the API is still
+            being designed. Use <code>1.0.0</code> when the lab's API contract
+            is stable enough for students to depend on.
+          </div>
+        </section>
+
+        <section id="frontend" class="card">
+          <span class="step">FRONTEND</span>
+          <h2>Version the Vue application</h2>
+          <p>
+            The frontend version lives in
+            <code>frontend/package.json</code>. This repo already has:
+          </p>
+          <pre><code>{
+  "name": "ku-workshop-todo-frontend",
+  "version": "1.0.0",
+  "private": true
+}</code></pre>
+          <p>
+            Even though the app is private and not published to npm, the version
+            still helps identify which UI, API client, and dependency set was
+            used in a workshop or deployment.
+          </p>
+          <h3>Frontend version decisions</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Change</th>
+                <th>Version bump</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Fix an edit button that did not submit the update.</td>
+                <td><code>PATCH</code></td>
+                <td>Same screen and API behavior, corrected implementation.</td>
+              </tr>
+              <tr>
+                <td>Add a completed/incomplete filter.</td>
+                <td><code>MINOR</code></td>
+                <td>New feature without removing existing behavior.</td>
+              </tr>
+              <tr>
+                <td>Change the app to require a different login response.</td>
+                <td><code>MAJOR</code></td>
+                <td>The frontend no longer works with the old backend contract.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            Keep dependency ranges intentional. A patch update such as
+            <code>1.20.0</code> to <code>1.20.1</code> should be low risk, but
+            a major framework update should be tested with
+            <code>npm run build --prefix frontend</code> and a browser CRUD
+            check.
+          </p>
+        </section>
+
+        <section id="workflow" class="card">
+          <span class="step">WORKFLOW</span>
+          <h2>Recommended release workflow</h2>
+          <ol>
+            <li>Decide the version bump from the actual behavior change.</li>
+            <li>
+              Update <code>backend/TodoApi/TodoApi.csproj</code> and/or
+              <code>frontend/package.json</code>.
+            </li>
+            <li>Run the backend and frontend verification commands.</li>
+            <li>Write release notes with breaking changes listed first.</li>
+            <li>Create a Git tag such as <code>backend-v1.0.0</code>,
+              <code>frontend-v1.0.1</code>, or <code>v1.1.0</code> for a
+              coordinated full-stack release.
+            </li>
+          </ol>
+          <pre><code>dotnet build backend/TodoApi/TodoApi.csproj
+npm run build --prefix frontend
+git tag v1.0.0</code></pre>
+          <div class="warning">
+            Use one shared tag, such as <code>v1.2.0</code>, when backend and
+            frontend must be released together. Use component tags only when
+            they can be deployed independently.
+          </div>
+        </section>
+
+        <section id="examples" class="card">
+          <span class="step">EXAMPLES</span>
+          <h2>Workshop version examples</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th>Backend</th>
+                <th>Frontend</th>
+                <th>Suggested release</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Fix frontend edit only.</td>
+                <td>No API change.</td>
+                <td><code>1.0.0 -> 1.0.1</code></td>
+                <td><code>frontend-v1.0.1</code></td>
+              </tr>
+              <tr>
+                <td>Add Todo priority to API and UI.</td>
+                <td><code>1.0.0 -> 1.1.0</code></td>
+                <td><code>1.0.0 -> 1.1.0</code></td>
+                <td><code>v1.1.0</code></td>
+              </tr>
+              <tr>
+                <td>Rename Todo response fields.</td>
+                <td><code>1.1.0 -> 2.0.0</code></td>
+                <td><code>1.1.0 -> 2.0.0</code></td>
+                <td><code>v2.0.0</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="checklist" class="card final-card">
+          <span class="step">CHECKLIST</span>
+          <h2>Before tagging a release</h2>
+          <ul class="checklist">
+            <li>The version bump matches the public behavior change.</li>
+            <li>Backend DTOs, endpoints, auth rules, and status codes are documented.</li>
+            <li>Frontend API client still matches the backend contract.</li>
+            <li><code>dotnet build backend/TodoApi/TodoApi.csproj</code> passes.</li>
+            <li><code>npm run build --prefix frontend</code> passes.</li>
+            <li>Release notes explain migration steps for any breaking change.</li>
+          </ul>
+        </section>
+      </article>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        Web Technology Development Basic Workshop
+        <p>Instructor:  <a href="https://suriyasonphu.com">Suriya Sonphu</a></p>
+      </div>
+    </footer>
+  </body>
+</html>
