@@ -43,6 +43,18 @@ function startMockApi() {
         response.end(JSON.stringify(todo))
         return
       }
+      const todoIdMatch = request.url?.match(/^\/api\/todos\/(\d+)$/)
+      if (todoIdMatch && request.method === 'PUT') {
+        const todo = todos.find((item) => item.id === Number(todoIdMatch[1]))
+        if (!todo) {
+          response.statusCode = 404
+          response.end(JSON.stringify({ message: 'Not found' }))
+          return
+        }
+        Object.assign(todo, JSON.parse(body))
+        response.end(JSON.stringify(todo))
+        return
+      }
       response.statusCode = 404
       response.end(JSON.stringify({ message: 'Not found' }))
     })
@@ -123,8 +135,17 @@ try {
       response.status() === 201),
     page.getByRole('button', { name: 'Add' }).click(),
   ])
-  await page.reload({ waitUntil: 'networkidle' })
-  await page.getByText('Capture the completed workshop app').waitFor()
+  await page.getByRole('button', { name: 'Edit' }).last().click()
+  await page.getByRole('textbox', { name: 'Edit Capture the completed workshop app' })
+    .fill('Edit a Todo with the API')
+  await Promise.all([
+    page.waitForResponse((response) =>
+      response.url().endsWith('/api/todos/3') &&
+      response.request().method() === 'PUT' &&
+      response.status() === 200),
+    page.getByRole('button', { name: 'Save' }).click(),
+  ])
+  await page.getByText('Edit a Todo with the API').waitFor()
 
   await mkdir(path.dirname(outputPath), { recursive: true })
   await page.screenshot({ path: outputPath, fullPage: true })
