@@ -1066,7 +1066,7 @@ body {
 }</code></pre>
           <p>
             Confirm <code>src/main.ts</code> still contains
-            <code>import '../assets/main.css'</code>.
+            <code>import './assets/main.css'</code>.
           </p>
           <div class="note">
             This uses Tailwind's Vite plugin, so the basic setup does not need
@@ -1283,6 +1283,8 @@ export async function deleteTodo(id: number): Promise&lt;void&gt; {
 const username = ref('student')
 const password = ref('password')
 const newTitle = ref('')
+const editingTodoId = ref&lt;number | null&gt;(null)
+const editingTitle = ref('')
 const isAuthenticated = ref(hasToken())
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -1403,23 +1405,59 @@ onMounted(() =&gt; {
 
           <h3 id="ui-edit">7.7 Edit a Todo</h3>
           <p>
-            Send the Todo's id and its updated fields to
-            <code>PUT /api/todos/:id</code>. Replace the local item with the
-            response so the UI reflects the server's saved value.
+            Select <strong>Edit</strong> to show an inline form for that Todo.
+            This avoids browser-specific <code>window.prompt()</code> dialogs.
+            Send the Todo's id and updated fields to <code>PUT /api/todos/:id</code>.
+            Replace the local item with the response so the UI reflects the
+            server's saved value, then close the form.
           </p>
-          <pre><code>async function handleRename(todo: Todo): Promise&lt;void&gt; {
-  const title = window.prompt('Rename Todo', todo.title)?.trim()
-  if (!title || title === todo.title) return
+          <pre><code>function startEditing(todo: Todo): void {
+  editingTodoId.value = todo.id
+  editingTitle.value = todo.title
+}
+
+function cancelEditing(): void {
+  editingTodoId.value = null
+  editingTitle.value = ''
+}
+
+async function handleRename(todo: Todo): Promise&lt;void&gt; {
+  const title = editingTitle.value.trim()
+  if (!title) return
+
+  if (title === todo.title) {
+    cancelEditing()
+    return
+  }
+
   try {
     const updated = await updateTodo(todo.id, {
       title,
       isCompleted: todo.isCompleted,
     })
     Object.assign(todo, updated)
+    cancelEditing()
   } catch (error) {
     showError(error)
   }
 }</code></pre>
+          <pre><code>&lt;template v-if="editingTodoId === todo.id"&gt;
+  &lt;form class="flex min-w-0 flex-1 gap-2" @submit.prevent="handleRename(todo)"&gt;
+    &lt;input v-model="editingTitle" :aria-label="`Edit ${todo.title}`" required /&gt;
+    &lt;button type="submit"&gt;Save&lt;/button&gt;
+    &lt;button type="button" @click="cancelEditing"&gt;Cancel&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/template&gt;
+&lt;template v-else&gt;
+  &lt;span&gt;{{ todo.title }}&lt;/span&gt;
+  &lt;button type="button" @click="startEditing(todo)"&gt;Edit&lt;/button&gt;
+  &lt;button type="button" @click="handleDelete(todo)"&gt;Delete&lt;/button&gt;
+&lt;/template&gt;</code></pre>
+          <div class="checkpoint">
+            <strong>Checkpoint:</strong> click Edit, change a title, and click
+            Save. Refresh the page: the new title must still be present because
+            it was saved through the API, not only changed in the browser.
+          </div>
 
           <h3 id="ui-delete">7.8 Delete a Todo</h3>
           <p>
@@ -1491,6 +1529,8 @@ const todos = ref&lt;Todo[]&gt;([])
 const username = ref('student')
 const password = ref('password')
 const newTitle = ref('')
+const editingTodoId = ref&lt;number | null&gt;(null)
+const editingTitle = ref('')
 const isAuthenticated = ref(hasToken())
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -1553,15 +1593,30 @@ async function handleToggle(todo: Todo): Promise&lt;void&gt; {
   }
 }
 
+function startEditing(todo: Todo): void {
+  editingTodoId.value = todo.id
+  editingTitle.value = todo.title
+}
+
+function cancelEditing(): void {
+  editingTodoId.value = null
+  editingTitle.value = ''
+}
+
 async function handleRename(todo: Todo): Promise&lt;void&gt; {
-  const title = window.prompt('Rename Todo', todo.title)?.trim()
-  if (!title || title === todo.title) return
+  const title = editingTitle.value.trim()
+  if (!title) return
+  if (title === todo.title) {
+    cancelEditing()
+    return
+  }
   try {
     const updated = await updateTodo(todo.id, {
       title,
       isCompleted: todo.isCompleted,
     })
     Object.assign(todo, updated)
+    cancelEditing()
   } catch (error) {
     showError(error)
   }
@@ -1580,6 +1635,7 @@ async function handleDelete(todo: Todo): Promise&lt;void&gt; {
 function handleLogout(): void {
   logout()
   todos.value = []
+  cancelEditing()
   isAuthenticated.value = false
 }
 
@@ -1644,9 +1700,18 @@ onMounted(() =&gt; {
         &lt;ul v-else class="space-y-3"&gt;
           &lt;li v-for="todo in todos" :key="todo.id" class="flex items-center gap-3 border border-zinc-200 bg-white p-4 shadow-sm"&gt;
             &lt;input class="size-5 accent-amber-400" type="checkbox" :checked="todo.isCompleted" :aria-label="`Mark ${todo.title} completed`" @change="handleToggle(todo)" /&gt;
-            &lt;span class="min-w-0 flex-1 break-words" :class="todo.isCompleted ? 'text-zinc-400 line-through' : ''"&gt;{{ todo.title }}&lt;/span&gt;
-            &lt;button class="font-semibold text-zinc-600 hover:text-zinc-950" type="button" @click="handleRename(todo)"&gt;Edit&lt;/button&gt;
-            &lt;button class="font-semibold text-red-700 hover:text-red-900" type="button" @click="handleDelete(todo)"&gt;Delete&lt;/button&gt;
+            &lt;template v-if="editingTodoId === todo.id"&gt;
+              &lt;form class="flex min-w-0 flex-1 gap-2" @submit.prevent="handleRename(todo)"&gt;
+                &lt;input v-model="editingTitle" class="min-w-0 flex-1 border border-zinc-300 px-2 py-1 outline-none focus:border-zinc-950" :aria-label="`Edit ${todo.title}`" required /&gt;
+                &lt;button class="font-semibold text-zinc-950 hover:text-amber-700" type="submit"&gt;Save&lt;/button&gt;
+                &lt;button class="font-semibold text-zinc-600 hover:text-zinc-950" type="button" @click="cancelEditing"&gt;Cancel&lt;/button&gt;
+              &lt;/form&gt;
+            &lt;/template&gt;
+            &lt;template v-else&gt;
+              &lt;span class="min-w-0 flex-1 break-words" :class="todo.isCompleted ? 'text-zinc-400 line-through' : ''"&gt;{{ todo.title }}&lt;/span&gt;
+              &lt;button class="font-semibold text-zinc-600 hover:text-zinc-950" type="button" @click="startEditing(todo)"&gt;Edit&lt;/button&gt;
+              &lt;button class="font-semibold text-red-700 hover:text-red-900" type="button" @click="handleDelete(todo)"&gt;Delete&lt;/button&gt;
+            &lt;/template&gt;
           &lt;/li&gt;
         &lt;/ul&gt;
       &lt;/section&gt;
