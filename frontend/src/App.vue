@@ -15,6 +15,8 @@ const todos = ref<Todo[]>([])
 const username = ref('student')
 const password = ref('password')
 const newTitle = ref('')
+const editingTodoId = ref<number | null>(null)
+const editingTitle = ref('')
 const isAuthenticated = ref(hasToken())
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -77,14 +79,31 @@ async function handleToggle(todo: Todo): Promise<void> {
   }
 }
 
+function startEditing(todo: Todo): void {
+  editingTodoId.value = todo.id
+  editingTitle.value = todo.title
+}
+
+function cancelEditing(): void {
+  editingTodoId.value = null
+  editingTitle.value = ''
+}
+
 async function handleRename(todo: Todo): Promise<void> {
-  const title = window.prompt('Rename Todo', todo.title)?.trim()
-  if (!title || title === todo.title) return
+  const title = editingTitle.value.trim()
+  if (!title) return
+
+  if (title === todo.title) {
+    cancelEditing()
+    return
+  }
+
   try {
     Object.assign(todo, await updateTodo(todo.id, {
       title,
       isCompleted: todo.isCompleted,
     }))
+    cancelEditing()
   } catch (error) {
     showError(error)
   }
@@ -103,6 +122,7 @@ async function handleDelete(todo: Todo): Promise<void> {
 function handleLogout(): void {
   logout()
   todos.value = []
+  cancelEditing()
   isAuthenticated.value = false
 }
 
@@ -206,12 +226,26 @@ onMounted(() => {
               :aria-label="`Mark ${todo.title} completed`"
               @change="handleToggle(todo)"
             />
-            <span
-              class="min-w-0 flex-1 break-words"
-              :class="todo.isCompleted ? 'text-zinc-400 line-through' : ''"
-            >{{ todo.title }}</span>
-            <button class="font-semibold text-zinc-600 hover:text-zinc-950" type="button" @click="handleRename(todo)">Edit</button>
-            <button class="font-semibold text-red-700 hover:text-red-900" type="button" @click="handleDelete(todo)">Delete</button>
+            <template v-if="editingTodoId === todo.id">
+              <form class="flex min-w-0 flex-1 gap-2" @submit.prevent="handleRename(todo)">
+                <input
+                  v-model="editingTitle"
+                  class="min-w-0 flex-1 border border-zinc-300 px-2 py-1 outline-none focus:border-zinc-950"
+                  :aria-label="`Edit ${todo.title}`"
+                  required
+                />
+                <button class="font-semibold text-zinc-950 hover:text-amber-700" type="submit">Save</button>
+                <button class="font-semibold text-zinc-600 hover:text-zinc-950" type="button" @click="cancelEditing">Cancel</button>
+              </form>
+            </template>
+            <template v-else>
+              <span
+                class="min-w-0 flex-1 break-words"
+                :class="todo.isCompleted ? 'text-zinc-400 line-through' : ''"
+              >{{ todo.title }}</span>
+              <button class="font-semibold text-zinc-600 hover:text-zinc-950" type="button" @click="startEditing(todo)">Edit</button>
+              <button class="font-semibold text-red-700 hover:text-red-900" type="button" @click="handleDelete(todo)">Delete</button>
+            </template>
           </li>
         </ul>
       </section>
