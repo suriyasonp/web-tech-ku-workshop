@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Web Technology Basic Workshop - Markdown from Zero to Hero</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="frontend.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Web Technology Development Basic Workshop</span>
+        <p>Instructor: <a href="https://suriyasonphu.com">Suriya Sonphu</a></p>
+        <h1>Write Project Documentation with Markdown</h1>
+        <p class="lead">Start at zero: learn the small set of Markdown patterns needed to make a project README, setup guide, API note, and contribution guide easy to scan, maintain, and trust.</p>
+        <div class="hero-grid">
+          <div><strong>Level</strong><span>Beginner</span></div>
+          <div><strong>Format</strong><span>Markdown</span></div>
+          <div><strong>Outcome</strong><span>Useful project docs</span></div>
+          <div><strong>Practice</strong><span>Todo workshop</span></div>
+        </div>
+      </div>
+    </header>
+    <main class="wrap layout">
+      <nav class="toc" aria-label="Markdown guide navigation">
+        <strong>Markdown Guide</strong>
+        <a class="lab-switch" href="index.html">Backend Lab</a>
+        <a class="lab-switch" href="frontend.html">Frontend Lab</a>
+        <a class="lab-switch" href="versioning.html">Versioning Guide</a>
+        <a href="#why">Why documentation</a>
+        <a href="#first-file">Your first file</a>
+        <a href="#building-blocks">Core Markdown</a>
+        <a href="#code">Code and commands</a>
+        <a href="#readme">README structure</a>
+        <a href="#best-practices">Best practices</a>
+        <a href="#review">Review checklist</a>
+      </nav>
+      <article>
+        <section id="why" class="card">
+          <span class="step">START HERE</span>
+          <h2>What is Markdown, and why use it?</h2>
+          <p>Markdown is plain text with a few readable symbols. GitHub turns those symbols into headings, links, lists, tables, and code blocks. The same file stays useful in an editor, a pull request, and on GitHub.</p>
+          <p>In a project, documentation is part of the product: it tells the next developer how to run the app, what an API expects, and how to contribute safely. Start with a <code>README.md</code> in the repository root; create focused files in <code>docs/</code> as the project grows.</p>
+          <div class="checkpoint">Document a task while you can still verify every step yourself. If a new student can follow it, the document is working.</div>
+        </section>
+        <section id="first-file" class="card">
+          <span class="step">ZERO TO ONE</span>
+          <h2>Create your first Markdown file</h2>
+          <p>Make a file called <code>README.md</code>. The <code>.md</code> extension tells GitHub and many editors to render it as Markdown. Add this example, save it, then preview it in VS Code or on a GitHub branch.</p>
+          <pre><code># Todo API
+
+A small API for managing tasks.
+
+## Run locally
+
+1. Install the .NET SDK.
+2. Run `dotnet run` from `backend/TodoApi`.
+3. Open `http://localhost:5000/scalar/v1`.</code></pre>
+          <p>Use one level-1 heading (<code>#</code>) per document. Then use <code>##</code> and <code>###</code> to show the structure below it.</p>
+        </section>
+        <section id="building-blocks" class="card">
+          <span class="step">FOUNDATIONS</span>
+          <h2>The Markdown building blocks</h2>
+          <table>
+            <thead><tr><th>Write this</th><th>It becomes</th><th>Use it for</th></tr></thead>
+            <tbody>
+              <tr><td><code>## Setup</code></td><td>Section heading</td><td>Breaking a guide into steps</td></tr>
+              <tr><td><code>**important**</code></td><td><strong>important</strong></td><td>A short warning or key term</td></tr>
+              <tr><td><code>[GitHub](https://github.com)</code></td><td>A clickable link</td><td>Official references and related docs</td></tr>
+              <tr><td><code>- Install Node.js</code></td><td>Bullet list</td><td>Unordered requirements</td></tr>
+              <tr><td><code>1. Clone the repo</code></td><td>Numbered list</td><td>Steps that must happen in order</td></tr>
+              <tr><td><code>`npm run dev`</code></td><td>Inline code</td><td>Commands, files, fields, and values</td></tr>
+            </tbody>
+          </table>
+          <h3>Links should say where they go</h3>
+          <p>Prefer <code>[Install Node.js](https://nodejs.org/)</code> over <code>[click here](https://nodejs.org/)</code>. Descriptive link text is easier to scan and still makes sense out of context.</p>
+        </section>
+        <section id="code" class="card">
+          <span class="step">MAKE IT RUNNABLE</span>
+          <h2>Show commands and code clearly</h2>
+          <p>Put a single command, filename, HTTP method, or value in inline code. Put multi-line commands in a fenced code block, and name the language after the opening fence when possible for syntax coloring.</p>
+          <pre><code>\`\`\`bash
+npm install
+npm run dev
+\`\`\`
+
+\`\`\`json
+{ "title": "Learn Markdown", "isCompleted": false }
+\`\`\`</code></pre>
+          <p>Every command should include its context: the directory to open, required environment variables, expected URL or output, and how to stop or undo the action. Never include real passwords, access tokens, or private connection strings in examples.</p>
+          <div class="checkpoint">Copy each command from the document into a fresh terminal before publishing it. Documentation that cannot be run becomes confusing faster than missing documentation.</div>
+        </section>
+        <section id="readme" class="card">
+          <span class="step">PROJECT DOCUMENT</span>
+          <h2>A README that helps people start</h2>
+          <ol>
+            <li><strong>Name and one-sentence purpose</strong> — what problem does it solve?</li>
+            <li><strong>Features</strong> — main user-visible capabilities.</li>
+            <li><strong>Requirements</strong> — runtime, SDK, database, and accounts needed.</li>
+            <li><strong>Quick start</strong> — exact install and run commands.</li>
+            <li><strong>Configuration</strong> — variable names and safe example values.</li>
+            <li><strong>Usage or API examples</strong> — show one successful path.</li>
+            <li><strong>Testing and troubleshooting</strong> — how to verify and common fixes.</li>
+            <li><strong>Contributing and license</strong> — how changes are proposed and shared.</li>
+          </ol>
+          <p>Keep the README as the front door. Move long tutorials, design decisions, and API reference material to <code>docs/</code>, then link to them from the README.</p>
+        </section>
+        <section id="best-practices" class="card">
+          <span class="step">BEST PRACTICES</span>
+          <h2>Write for the reader who was not in the room</h2>
+          <ul>
+            <li>Start with the reader's goal, then give the smallest working path.</li>
+            <li>Use short headings that answer a question: <em>How do I run it?</em>, not <em>Miscellaneous</em>.</li>
+            <li>Prefer concrete examples: real file paths, routes, and expected results.</li>
+            <li>Separate required steps from optional enhancements.</li>
+            <li>Keep terminology consistent: do not switch between “task”, “todo”, and “item” for the same entity.</li>
+            <li>Link to the authoritative source instead of copying a dependency's full manual.</li>
+            <li>Update docs in the same pull request as the behavior they describe.</li>
+          </ul>
+          <h3>Documentation is versioned too</h3>
+          <p>When the API route, environment variable, or setup command changes, update its Markdown in the same branch. Reviewers should be able to compare the code change and its instructions together.</p>
+        </section>
+        <section id="review" class="card">
+          <span class="step">BEFORE YOU MERGE</span>
+          <h2>Markdown review checklist</h2>
+          <ul>
+            <li>There is one clear title and a predictable heading hierarchy.</li>
+            <li>Links work and their text explains the destination.</li>
+            <li>Commands can be copied exactly, with the required directory stated.</li>
+            <li>Examples use safe placeholder secrets such as <code>YOUR_TOKEN</code>.</li>
+            <li>The page explains the expected result, not only the action.</li>
+            <li>New terms are introduced before they are used.</li>
+            <li>The page is easy to skim: short paragraphs, lists, and focused sections.</li>
+          </ul>
+          <p>For the complete syntax reference, see <a href="https://docs.github.com/en/get-started/writing-on-github" target="_blank" rel="noreferrer">GitHub Docs: Writing on GitHub</a>.</p>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
