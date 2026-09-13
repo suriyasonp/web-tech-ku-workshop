@@ -35,6 +35,7 @@
         <a class="lab-switch" href="visual-studio.html">Visual Studio Setup</a>
         <a href="#outcomes">Learning outcomes</a>
         <a href="#foundations">Before Step 0: foundations</a>
+        <a href="#backend-naming">Backend naming conventions</a>
         <a href="#setup">0. Setup</a>
         <a href="#project">1. Create project</a>
         <a href="#hello">2. Hello endpoint</a>
@@ -214,6 +215,139 @@ app.MapGet("/api/todos", async (AppDbContext db) =>
             <a href="https://learn.microsoft.com/aspnet/core/web-api/?view=aspnetcore-10.0" target="_blank" rel="noreferrer">Web API overview</a>,
             and <a href="https://learn.microsoft.com/dotnet/csharp/tour-of-csharp/" target="_blank" rel="noreferrer">C# tour</a>.
           </p>
+        </section>
+
+        <section id="backend-naming" class="card">
+          <span class="step">BEFORE STEP 0</span>
+          <h2>Backend naming conventions</h2>
+          <p>
+            Naming conventions make a codebase easier to read before anyone
+            explains it. In this lab, use names that reveal responsibility:
+            API contracts live in <code>Dtos</code>, database objects live in
+            <code>Models</code>, and infrastructure such as EF Core lives in
+            <code>Data</code>.
+          </p>
+
+          <h3>C# and project names</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Convention</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Project / namespace</td>
+                <td>PascalCase</td>
+                <td><code>TodoApi</code>, <code>TodoApi.Dtos</code></td>
+              </tr>
+              <tr>
+                <td>Class / record / enum</td>
+                <td>PascalCase noun</td>
+                <td><code>TodoItem</code>, <code>TodoStatus</code></td>
+              </tr>
+              <tr>
+                <td>DTO</td>
+                <td>Resource + action + <code>Dto</code></td>
+                <td><code>TodoGetDto</code>, <code>TodoCreateDto</code></td>
+              </tr>
+              <tr>
+                <td>Method / endpoint handler</td>
+                <td>PascalCase verb phrase</td>
+                <td><code>GetTodos</code>, <code>CreateTodo</code></td>
+              </tr>
+              <tr>
+                <td>Local variable / parameter</td>
+                <td>camelCase</td>
+                <td><code>todo</code>, <code>todoId</code>, <code>jwtKey</code></td>
+              </tr>
+              <tr>
+                <td>Private field</td>
+                <td>underscore + camelCase</td>
+                <td><code>_logger</code>, <code>_dbContext</code></td>
+              </tr>
+              <tr>
+                <td>Boolean property</td>
+                <td>Readable yes/no meaning</td>
+                <td><code>IsCompleted</code>, <code>IsActive</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Folders and files for this lab</h3>
+          <pre><code>TodoApi/
+  Program.cs
+  Data/
+    AppDbContext.cs
+  Dtos/
+    LoginDto.cs
+    LoginResponseDto.cs
+    TodoCreateDto.cs
+    TodoGetDto.cs
+    TodoUpdateDto.cs
+  Models/
+    TodoItem.cs</code></pre>
+          <ul>
+            <li>
+              Use singular names for one model or DTO:
+              <code>TodoItem</code>, not <code>TodoItems</code>.
+            </li>
+            <li>
+              Use plural route resources:
+              <code>/api/todos</code>, not <code>/api/todo</code>.
+            </li>
+            <li>
+              Match file names to type names:
+              <code>TodoCreateDto.cs</code> contains
+              <code>TodoCreateDto</code>.
+            </li>
+            <li>
+              Avoid unclear abbreviations such as <code>td</code>,
+              <code>res</code>, or <code>usr</code>; prefer
+              <code>todo</code>, <code>result</code>, and
+              <code>username</code>.
+            </li>
+          </ul>
+
+          <h3>API route and JSON names</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Convention</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Route path</td>
+                <td>lowercase plural nouns</td>
+                <td><code>/api/todos</code></td>
+              </tr>
+              <tr>
+                <td>Route parameter</td>
+                <td>short, meaningful camelCase</td>
+                <td><code>/api/todos/{id}</code></td>
+              </tr>
+              <tr>
+                <td>JSON property</td>
+                <td>camelCase in API payloads</td>
+                <td><code>{ "isCompleted": true }</code></td>
+              </tr>
+              <tr>
+                <td>Endpoint name</td>
+                <td>verb + resource</td>
+                <td><code>GetTodos</code>, <code>UpdateTodo</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="checkpoint">
+            Checkpoint: before adding a new file, ask “what responsibility does
+            this name communicate?” A good name should help another student find
+            the correct file without reading the whole project.
+          </div>
         </section>
 
         <section id="setup" class="card">
