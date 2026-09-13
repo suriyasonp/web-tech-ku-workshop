@@ -43,6 +43,7 @@
         <a href="#foundation-composables">Composables</a>
         <a href="#foundation-state">State and Pinia</a>
         <a href="#foundation-routing">Routing</a>
+        <a href="#frontend-naming">Frontend naming conventions</a>
         <a href="#foundation-ready">Readiness check</a>
         <a href="#flow">Request flow</a>
         <a href="#setup">0. Setup</a>
@@ -787,6 +788,139 @@ export const router = createRouter({
               >Vue Router getting started</a
             >.
           </p>
+        </section>
+
+        <section id="frontend-naming" class="card">
+          <span class="step">BEFORE YOU CODE</span>
+          <h2>Frontend naming conventions</h2>
+          <p>
+            Frontend names should make the UI structure and data flow easy to
+            scan. In this lab, separate reusable types, API services,
+            composables, components, and pages by responsibility.
+          </p>
+
+          <h3>Vue, TypeScript and file names</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Convention</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Vue component file</td>
+                <td>PascalCase</td>
+                <td><code>TodoList.vue</code>, <code>LoginForm.vue</code></td>
+              </tr>
+              <tr>
+                <td>Component name</td>
+                <td>PascalCase noun phrase</td>
+                <td><code>TodoItemRow</code>, <code>TodoEditor</code></td>
+              </tr>
+              <tr>
+                <td>Type / interface</td>
+                <td>PascalCase</td>
+                <td><code>Todo</code>, <code>LoginResponse</code></td>
+              </tr>
+              <tr>
+                <td>Function</td>
+                <td>camelCase verb phrase</td>
+                <td><code>loadTodos</code>, <code>handleLogin</code></td>
+              </tr>
+              <tr>
+                <td>Reactive state</td>
+                <td>camelCase noun or state phrase</td>
+                <td><code>todos</code>, <code>isLoading</code></td>
+              </tr>
+              <tr>
+                <td>Composable file</td>
+                <td><code>use</code> + PascalCase topic</td>
+                <td><code>useTodos.ts</code>, <code>useAuth.ts</code></td>
+              </tr>
+              <tr>
+                <td>Service file</td>
+                <td>camelCase topic + responsibility</td>
+                <td><code>apiClient.ts</code>, <code>todoService.ts</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Recommended frontend structure</h3>
+          <pre><code>src/
+  App.vue
+  main.ts
+  components/
+    LoginForm.vue
+    TodoItemRow.vue
+    TodoList.vue
+  composables/
+    useAuth.ts
+    useTodos.ts
+  services/
+    apiClient.ts
+    todoService.ts
+  types/
+    todo.ts
+    auth.ts</code></pre>
+          <ul>
+            <li>
+              Name components by what they render:
+              <code>TodoItemRow</code> is clearer than <code>Item</code>.
+            </li>
+            <li>
+              Prefix event handlers with <code>handle</code>:
+              <code>handleCreate</code>, <code>handleDelete</code>.
+            </li>
+            <li>
+              Prefix boolean state with <code>is</code>, <code>has</code>, or
+              <code>can</code>: <code>isAuthenticated</code>,
+              <code>hasToken</code>, <code>canSubmit</code>.
+            </li>
+            <li>
+              Keep API functions aligned with backend actions:
+              <code>getTodos</code>, <code>createTodo</code>,
+              <code>updateTodo</code>, <code>deleteTodo</code>.
+            </li>
+          </ul>
+
+          <h3>Template and event names</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Convention</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Props</td>
+                <td>camelCase in script, kebab-case in template</td>
+                <td><code>todoItem</code> → <code>todo-item</code></td>
+              </tr>
+              <tr>
+                <td>Custom events</td>
+                <td>kebab-case in templates</td>
+                <td><code>@todo-created</code>, <code>@logout-requested</code></td>
+              </tr>
+              <tr>
+                <td>CSS classes</td>
+                <td>Tailwind utilities directly in markup</td>
+                <td><code>flex items-center gap-3</code></td>
+              </tr>
+              <tr>
+                <td>Environment variables</td>
+                <td><code>VITE_</code> prefix</td>
+                <td><code>VITE_API_BASE_URL</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="checkpoint">
+            Checkpoint: when you split <code>App.vue</code> later, a student
+            should be able to guess each file's purpose from the filename alone.
+          </div>
         </section>
         <section id="foundation-ready" class="card">
           <span class="step">BEFORE YOU CODE</span>
