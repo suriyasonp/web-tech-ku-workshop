@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Web Technology Basic Workshop - Visual Studio API Setup</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="frontend.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Web Technology Development Basic Workshop</span>
+        <p>Instructor: <a href="https://suriyasonphu.com">Suriya Sonphu</a></p>
+        <h1>Install Visual Studio for Building APIs</h1>
+        <p class="lead">A Windows-only setup guide for the purple Visual Studio IDE. Complete this guide before Backend Lab Step 0 if you prefer Visual Studio over VS Code for creating and running a .NET API.</p>
+        <div class="hero-grid">
+          <div><strong>Platform</strong><span>Windows</span></div>
+          <div><strong>IDE</strong><span>Visual Studio</span></div>
+          <div><strong>Workload</strong><span>ASP.NET and web development</span></div>
+          <div><strong>Scope</strong><span>Install and verify only</span></div>
+        </div>
+      </div>
+    </header>
+    <main class="wrap layout">
+      <nav class="toc" aria-label="Visual Studio setup navigation">
+        <strong>Visual Studio Setup</strong>
+        <a class="lab-switch" href="index.html#setup">← Backend Lab Step 0</a>
+        <a class="lab-switch" href="frontend.html">Frontend Lab</a>
+        <a href="#choose">Choose the installer</a>
+        <a href="#workload">Select the workload</a>
+        <a href="#launch">First launch</a>
+        <a href="#verify">Verify the setup</a>
+        <a href="#ready">Ready for the lab</a>
+      </nav>
+      <article>
+        <section id="choose" class="card">
+          <span class="step">BEFORE STEP 0</span>
+          <h2>Choose the purple Visual Studio IDE</h2>
+          <p>Visual Studio is Microsoft's full Windows IDE. Its purple icon is different from the blue <strong>Visual Studio Code</strong> editor used in the main lab. This page is only for students who choose the purple Visual Studio application on Windows.</p>
+          <p>Download <strong>Visual Studio Community</strong> from the official <a href="https://visualstudio.microsoft.com/downloads/" target="_blank" rel="noreferrer">Visual Studio downloads page</a>. Community is suitable for individual learning and classroom work.</p>
+          <div class="note">Do not install Visual Studio Code for this path. VS Code remains a valid option in the Backend Lab; it is simply a different tool.</div>
+        </section>
+        <section id="workload" class="card">
+          <span class="step">INSTALL</span>
+          <h2>Select the API development workload</h2>
+          <ol>
+            <li>Run the Visual Studio installer you downloaded.</li>
+            <li>On the <strong>Workloads</strong> screen, find <strong>Web &amp; Cloud</strong>.</li>
+            <li>Check <strong>ASP.NET and web development</strong>.</li>
+            <li>Select <strong>Install</strong> and wait for the installer to finish.</li>
+          </ol>
+          <p>This workload installs the templates and tooling used to create ASP.NET Core web APIs. You do not need mobile, game, desktop, or data-science workloads for this API-only setup.</p>
+          <div class="checkpoint">Checkpoint: the installer shows <strong>ASP.NET and web development</strong> as selected before you start installation.</div>
+        </section>
+        <section id="launch" class="card">
+          <span class="step">FIRST LAUNCH</span>
+          <h2>Open Visual Studio</h2>
+          <p>Start Visual Studio from the Windows Start menu after installation. Signing in with a Microsoft account is optional for this workshop; choose the option to continue without an account if it is shown.</p>
+          <p>On the start window, choose <strong>Create a new project</strong>. This only confirms that the IDE is ready; do not create the Todo project yet. Continue to the Backend Lab for its project steps.</p>
+        </section>
+        <section id="verify" class="card">
+          <span class="step">VERIFY</span>
+          <h2>Confirm that API templates are available</h2>
+          <ol>
+            <li>In the project-template search box, type <code>web api</code>.</li>
+            <li>Confirm that an <strong>ASP.NET Core Web API</strong> template appears.</li>
+            <li>Select <strong>Cancel</strong> to return to the start window.</li>
+          </ol>
+          <p>If the template does not appear, open <strong>Visual Studio Installer</strong>, choose <strong>Modify</strong> for your installation, select <strong>ASP.NET and web development</strong>, then apply the change.</p>
+          <div class="checkpoint">Checkpoint: you can find the <strong>ASP.NET Core Web API</strong> template by searching for <code>web api</code>.</div>
+        </section>
+        <section id="ready" class="card final-card">
+          <span class="step">READY</span>
+          <h2>Return to Backend Lab Step 0</h2>
+          <p>Visual Studio is now installed and configured for API work. Return to <a href="index.html#setup">Backend Lab Step 0</a> and continue with the workshop's existing instructions. This guide deliberately does not replace or change any later lab step.</p>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
